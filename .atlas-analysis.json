@@ -1,0 +1,85 @@
+{
+  "projectType": "sdk-library",
+  "projectName": "Code Syntactic Sugar",
+  "projectDescription": "A React-focused syntax highlighting library that outputs React elements without dangerouslySetInnerHTML",
+  "theme": "palm",
+  "primaryColor": "#7c3aed",
+  "lightColor": "#a78bfa",
+  "darkColor": "#5b21b6",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "installation",
+              "quickstart"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "guides/basic-usage",
+              "guides/styling",
+              "guides/line-modifiers",
+              "guides/line-numbers",
+              "guides/custom-themes"
+            ]
+          },
+          {
+            "group": "Examples",
+            "pages": [
+              "examples/react-component",
+              "examples/nextjs",
+              "examples/custom-styling"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Functions",
+            "pages": [
+              "api/highlight",
+              "api/tokenize",
+              "api/generate"
+            ]
+          },
+          {
+            "group": "Types",
+            "pages": [
+              "api/types",
+              "api/constants"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "React element output without dangerouslySetInnerHTML",
+    "Syntax highlighting for JavaScript and JSX",
+    "Line modifiers (highlighted, added, removed)",
+    "CSS-customizable theming",
+    "Line numbers support",
+    "TypeScript support with full type definitions"
+  ],
+  "publicApiSurface": [
+    "highlight(code: string, config?: CodeSyntacticSugarConfig): ReactElement",
+    "tokenize(code: string): Token[]",
+    "generate(tokens: Token[]): Line[]",
+    "CodeSyntacticSugar.TokenTypes",
+    "CodeSyntacticSugar.TokenMap",
+    "CodeSyntacticSugar.LineModifiers",
+    "Token type",
+    "TokenType type",
+    "CodeSyntacticSugarConfig type",
+    "Line type",
+    "Modifier type"
+  ]
+}
