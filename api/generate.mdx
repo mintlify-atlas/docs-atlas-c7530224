@@ -1,0 +1,160 @@
+---
+title: generate()
+description: Transform tokens into line-structured elements ready for rendering
+---
+
+The `generate()` function transforms an array of tokens (from `tokenize()`) into an array of line objects. Each line contains styled token elements with appropriate CSS classes.
+
+## Signature
+
+```typescript
+function generate(tokens: Array<Token>): Line[]
+```
+
+## Parameters
+
+<ParamField path="tokens" type="Array<Token>" required>
+  An array of tokens produced by the `tokenize()` function. Each token is a tuple of `[type: number, value: string]`.
+</ParamField>
+
+## Returns
+
+<ResponseField name="Line[]" type="Array<Line>">
+  An array of line objects. Each line has the following structure:
+  
+  ```typescript
+  {
+    type: "element",
+    tagName: "span",
+    children: Child[],
+    properties: {
+      className: "css__line"
+    }
+  }
+  ```
+  
+  Each child token within a line has this structure:
+  
+  ```typescript
+  {
+    type: "element",
+    tagName: "span",
+    children: [{ type: "text", value: string }],
+    properties: {
+      className: `css__token--${tokenType}`,
+      style: {
+        color: `var(--css-${tokenType})`
+      }
+    }
+  }
+  ```
+</ResponseField>
+
+## Example
+
+```typescript
+import { tokenize, generate } from 'code-syntactic-sugar';
+
+const code = `const a = 10;
+const b = 20;`;
+
+const tokens = tokenize(code);
+const lines = generate(tokens);
+
+console.log(lines.length); // 2 (two lines of code)
+```
+
+## Token to CSS Class Mapping
+
+The `generate()` function applies CSS classes based on token types:
+
+| Token Type | CSS Class | CSS Variable |
+|------------|-----------|-------------|
+| identifier | `css__token--identifier` | `var(--css-identifier)` |
+| keyword | `css__token--keyword` | `var(--css-keyword)` |
+| string | `css__token--string` | `var(--css-string)` |
+| class | `css__token--class` | `var(--css-class)` |
+| property | `css__token--property` | `var(--css-property)` |
+| entity | `css__token--entity` | `var(--css-entity)` |
+| jsxliterals | `css__token--jsxliterals` | `var(--css-jsxliterals)` |
+| sign | `css__token--sign` | `var(--css-sign)` |
+| comment | `css__token--comment` | `var(--css-comment)` |
+| break | N/A (line separator) | N/A |
+| space | `css__token--space` | `var(--css-space)` |
+
+## Line Structure Details
+
+```typescript
+import { tokenize, generate } from 'code-syntactic-sugar';
+
+const code = `let x = 1;`;
+const tokens = tokenize(code);
+const lines = generate(tokens);
+
+// lines[0] structure:
+// {
+//   type: "element",
+//   tagName: "span",
+//   properties: { className: "css__line" },
+//   children: [
+//     {
+//       type: "element",
+//       tagName: "span",
+//       properties: {
+//         className: "css__token--keyword",
+//         style: { color: "var(--css-keyword)" }
+//       },
+//       children: [{ type: "text", value: "let" }]
+//     },
+//     // ... more tokens
+//   ]
+// }
+```
+
+## Multi-Line Token Handling
+
+```typescript
+import { tokenize, generate } from 'code-syntactic-sugar';
+
+const code = `/* This is a
+multi-line
+comment */`;
+
+const tokens = tokenize(code);
+const lines = generate(tokens);
+
+console.log(lines.length); // 3 lines
+// The multi-line comment token is automatically split
+// across multiple line objects
+```
+
+## Notes
+
+<Note>
+  The `generate()` function automatically splits tokens that contain newline characters into multiple lines, ensuring correct line-by-line rendering.
+</Note>
+
+<Note>
+  Break tokens (type `9`) are used as line separators. They create a new line but don't add visible content.
+</Note>
+
+<Note>
+  Each line has the CSS class `css__line`, which is useful for styling individual lines or adding line numbers with CSS counters.
+</Note>
+
+<Note>
+  The function uses CSS custom properties (variables) for token colors, allowing easy theme customization:
+  
+  ```css
+  :root {
+    --css-keyword: #f47067;
+    --css-string: #00a99a;
+    --css-identifier: #354150;
+    /* ... etc */
+  }
+  ```
+</Note>
+
+<Note>
+  This is a low-level API. Most users should use the `highlight()` function instead, which calls `generate()` internally after tokenization.
+</Note>

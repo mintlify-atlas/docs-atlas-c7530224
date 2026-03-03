@@ -1,0 +1,363 @@
+---
+title: Custom Themes
+description: Create beautiful custom color themes for your code syntax highlighting
+---
+
+## Creating a Theme
+
+Custom themes in Code Syntactic Sugar are created by defining CSS variables. Each token type has a corresponding CSS variable that controls its color.
+
+### Theme Structure
+
+A complete theme defines colors for all token types:
+
+```css
+:root {
+  --css-class: #2d5e9d;        /* Classes and numbers */
+  --css-identifier: #354150;    /* Variables and function names */
+  --css-sign: #8996a3;          /* Operators and punctuation */
+  --css-property: #0550ae;      /* Object properties */
+  --css-entity: #249a97;        /* Special entities */
+  --css-jsxliterals: #6266d1;   /* JSX tags and attributes */
+  --css-string: #00a99a;        /* String literals */
+  --css-keyword: #f47067;       /* Language keywords */
+  --css-comment: #a19595;       /* Comments */
+}
+```
+
+## Example Themes
+
+### GitHub Light
+
+A clean theme inspired by GitHub's light mode:
+
+```css
+:root {
+  --css-class: #0550ae;
+  --css-identifier: #24292f;
+  --css-sign: #6e7781;
+  --css-property: #0550ae;
+  --css-entity: #116329;
+  --css-jsxliterals: #8250df;
+  --css-string: #0a3069;
+  --css-keyword: #cf222e;
+  --css-comment: #6e7781;
+}
+
+pre {
+  background-color: #ffffff;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+}
+
+pre code {
+  color: #24292f;
+}
+```
+
+### GitHub Dark
+
+A theme inspired by GitHub's dark mode:
+
+```css
+.dark {
+  --css-class: #79c0ff;
+  --css-identifier: #e6edf3;
+  --css-sign: #8b949e;
+  --css-property: #79c0ff;
+  --css-entity: #56d364;
+  --css-jsxliterals: #d2a8ff;
+  --css-string: #a5d6ff;
+  --css-keyword: #ff7b72;
+  --css-comment: #8b949e;
+}
+
+.dark pre {
+  background-color: #0d1117;
+  border: 1px solid #30363d;
+}
+
+.dark pre code {
+  color: #e6edf3;
+}
+```
+
+### Dracula
+
+The popular Dracula theme:
+
+```css
+:root {
+  --css-class: #8be9fd;
+  --css-identifier: #f8f8f2;
+  --css-sign: #ff79c6;
+  --css-property: #50fa7b;
+  --css-entity: #8be9fd;
+  --css-jsxliterals: #ff79c6;
+  --css-string: #f1fa8c;
+  --css-keyword: #ff79c6;
+  --css-comment: #6272a4;
+}
+
+pre {
+  background-color: #282a36;
+  border-radius: 8px;
+}
+
+pre code {
+  color: #f8f8f2;
+}
+```
+
+### Monokai
+
+A vibrant theme inspired by Monokai:
+
+```css
+:root {
+  --css-class: #66d9ef;
+  --css-identifier: #f8f8f2;
+  --css-sign: #f92672;
+  --css-property: #a6e22e;
+  --css-entity: #fd971f;
+  --css-jsxliterals: #f92672;
+  --css-string: #e6db74;
+  --css-keyword: #f92672;
+  --css-comment: #75715e;
+}
+
+pre {
+  background-color: #272822;
+  border-radius: 6px;
+}
+
+pre code {
+  color: #f8f8f2;
+}
+```
+
+### Nord
+
+A arctic-inspired theme:
+
+```css
+:root {
+  --css-class: #8fbcbb;
+  --css-identifier: #d8dee9;
+  --css-sign: #81a1c1;
+  --css-property: #88c0d0;
+  --css-entity: #d08770;
+  --css-jsxliterals: #b48ead;
+  --css-string: #a3be8c;
+  --css-keyword: #81a1c1;
+  --css-comment: #616e88;
+}
+
+pre {
+  background-color: #2e3440;
+  border-radius: 8px;
+}
+
+pre code {
+  color: #d8dee9;
+}
+```
+
+### Solarized Light
+
+The classic Solarized light theme:
+
+```css
+:root {
+  --css-class: #268bd2;
+  --css-identifier: #657b83;
+  --css-sign: #93a1a1;
+  --css-property: #268bd2;
+  --css-entity: #cb4b16;
+  --css-jsxliterals: #d33682;
+  --css-string: #2aa198;
+  --css-keyword: #859900;
+  --css-comment: #93a1a1;
+}
+
+pre {
+  background-color: #fdf6e3;
+  border-radius: 6px;
+}
+
+pre code {
+  color: #657b83;
+}
+```
+
+## Theme Switcher
+
+Implement a theme switcher using CSS classes:
+
+<Tabs>
+  <Tab title="React Hook">
+    ```jsx
+    import { useState, useEffect } from 'react';
+
+    function useTheme() {
+      const [theme, setTheme] = useState('light');
+
+      useEffect(() => {
+        document.documentElement.className = theme;
+      }, [theme]);
+
+      const toggleTheme = () => {
+        setTheme(prev => prev === 'light' ? 'dark' : 'light');
+      };
+
+      return { theme, toggleTheme };
+    }
+
+    function ThemeSwitcher() {
+      const { theme, toggleTheme } = useTheme();
+
+      return (
+        <button onClick={toggleTheme}>
+          {theme === 'light' ? '🌙' : '☀️'}
+        </button>
+      );
+    }
+    ```
+  </Tab>
+  <Tab title="CSS">
+    ```css
+    /* Light theme (default) */
+    :root {
+      --css-class: #2d5e9d;
+      --css-identifier: #354150;
+      --css-sign: #8996a3;
+      --css-property: #0550ae;
+      --css-entity: #249a97;
+      --css-jsxliterals: #6266d1;
+      --css-string: #00a99a;
+      --css-keyword: #f47067;
+      --css-comment: #a19595;
+    }
+
+    /* Dark theme */
+    .dark {
+      --css-class: #79c0ff;
+      --css-identifier: #e6edf3;
+      --css-sign: #8b949e;
+      --css-property: #79c0ff;
+      --css-entity: #56d364;
+      --css-jsxliterals: #d2a8ff;
+      --css-string: #a5d6ff;
+      --css-keyword: #ff7b72;
+      --css-comment: #8b949e;
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Ensure Sufficient Contrast">
+    Make sure there's enough contrast between text colors and the background for readability:
+
+    ```css
+    /* Good: High contrast */
+    :root {
+      --css-keyword: #d73a49;
+      background-color: #ffffff;
+    }
+
+    /* Bad: Low contrast */
+    :root {
+      --css-keyword: #ffe0e0;
+      background-color: #ffffff;
+    }
+    ```
+
+    Use tools like [WebAIM Contrast Checker](https://webaim.org/resources/contrastchecker/) to verify contrast ratios.
+  </Accordion>
+
+  <Accordion title="Maintain Color Consistency">
+    Keep related token types visually similar:
+
+    ```css
+    /* Good: Related tokens use similar hues */
+    :root {
+      --css-class: #2d5e9d;
+      --css-property: #0550ae;  /* Similar blue tone */
+    }
+
+    /* Avoid: Unrelated colors */
+    :root {
+      --css-class: #2d5e9d;
+      --css-property: #ff0000;  /* Jarring difference */
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="Test with Different Code Types">
+    Test your theme with various languages and code patterns:
+
+    - JavaScript/TypeScript
+    - JSX/React components
+    - CSS
+    - JSON
+    - Comments and documentation
+  </Accordion>
+
+  <Accordion title="Consider Accessibility">
+    Design themes that work for users with color vision deficiencies:
+
+    - Don't rely solely on color to convey meaning
+    - Use sufficient color differences
+    - Test with color blindness simulators
+  </Accordion>
+</AccordionGroup>
+
+## Sharing Your Theme
+
+To share your custom theme:
+
+1. **Document the colors** - List all CSS variables with their hex values
+2. **Include examples** - Show screenshots or live demos
+3. **Provide installation** - Give clear CSS snippet to copy
+4. **Test thoroughly** - Verify it works with different code types
+
+<Note>
+  Consider creating a theme repository or submitting your theme to a community showcase.
+</Note>
+
+## Advanced Customization
+
+Go beyond colors by customizing additional properties:
+
+```css
+/* Custom font and sizing */
+pre code {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 15px;
+  line-height: 1.6;
+  letter-spacing: -0.01em;
+}
+
+/* Token-specific styles */
+.css__token--keyword {
+  font-weight: 600;
+}
+
+.css__token--string {
+  font-style: italic;
+}
+
+.css__token--comment {
+  opacity: 0.7;
+  font-style: italic;
+}
+
+/* Line hover effects */
+.css__line:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-left: 2px solid var(--css-keyword);
+}
+```

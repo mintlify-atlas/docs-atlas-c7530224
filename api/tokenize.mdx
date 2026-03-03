@@ -1,0 +1,141 @@
+---
+title: tokenize()
+description: Parse JavaScript/TypeScript code into an array of classified tokens
+---
+
+The `tokenize()` function parses JavaScript/TypeScript code and breaks it down into an array of tokens. Each token consists of a type identifier and the text value.
+
+## Signature
+
+```typescript
+function tokenize(code: string): Token[]
+```
+
+## Parameters
+
+<ParamField path="code" type="string" required>
+  The JavaScript or TypeScript code to tokenize as a string.
+</ParamField>
+
+## Returns
+
+<ResponseField name="Token[]" type="Array<Token>">
+  An array of tokens where each token is a tuple of `[type: number, value: string]`.
+  
+  The type is a numeric identifier corresponding to one of these token types:
+  - `0` - identifier
+  - `1` - keyword
+  - `2` - string
+  - `3` - class, number, null
+  - `4` - property
+  - `5` - entity (JSX component names)
+  - `6` - JSX literals
+  - `7` - sign (operators, punctuation)
+  - `8` - comment
+  - `9` - break (line break)
+  - `10` - space
+</ResponseField>
+
+## Example
+
+```typescript
+import { tokenize } from 'code-syntactic-sugar';
+
+const code = `const a = 10;`;
+const tokens = tokenize(code);
+
+// Result:
+// [
+//   [1, 'const'],    // keyword
+//   [10, ' '],       // space
+//   [0, 'a'],        // identifier
+//   [10, ' '],       // space
+//   [7, '='],        // sign
+//   [10, ' '],       // space
+//   [3, '10'],       // class (number)
+//   [7, ';']         // sign
+// ]
+```
+
+## Example with JSX
+
+```typescript
+import { tokenize } from 'code-syntactic-sugar';
+
+const code = `<Foo>Hello</Foo>`;
+const tokens = tokenize(code);
+
+// Result:
+// [
+//   [7, '<'],         // sign
+//   [5, 'Foo'],       // entity
+//   [7, '>'],         // sign
+//   [6, 'Hello'],     // jsxliterals
+//   [7, '</'],        // sign
+//   [5, 'Foo'],       // entity
+//   [7, '>']          // sign
+// ]
+```
+
+## Example with Property Access
+
+```typescript
+import { tokenize } from 'code-syntactic-sugar';
+
+const code = `promise.catch(log)`;
+const tokens = tokenize(code);
+
+// Result:
+// [
+//   [0, 'promise'],   // identifier
+//   [7, '.'],         // sign
+//   [0, 'catch'],     // identifier (not keyword when after dot)
+//   [7, '('],         // sign
+//   [0, 'log'],       // identifier
+//   [7, ')']          // sign
+// ]
+```
+
+## Token Types Reference
+
+The numeric token type constants are exported from the library:
+
+```typescript
+import {
+  T_IDENTIFIER,    // 0
+  T_KEYWORD,       // 1
+  T_STRING,        // 2
+  T_CLS_NUMBER,    // 3
+  T_PROPERTY,      // 4
+  T_ENTITY,        // 5
+  T_JSX_LITERALS,  // 6
+  T_SIGN,          // 7
+  T_COMMENT,       // 8
+  T_BREAK,         // 9
+  T_SPACE          // 10
+} from 'code-syntactic-sugar';
+```
+
+## Notes
+
+<Note>
+  The tokenizer intelligently handles JavaScript/TypeScript syntax including:
+  - String literals (single quotes, double quotes, template literals)
+  - Regular expressions
+  - JSX/TSX syntax
+  - Comments (single-line and multi-line)
+  - Keywords and identifiers
+  - Property access (e.g., `obj.catch` treats `catch` as identifier, not keyword)
+</Note>
+
+<Note>
+  JSX attribute values are always tokenized as strings, even if they look like keywords or numbers (e.g., `<svg height="24">` treats `24` as a string).
+</Note>
+
+<Note>
+  The tokenizer maintains state to correctly handle nested contexts like template literal expressions (`${...}`) and JSX expressions (`{...}`).
+</Note>
+
+<Note>
+  This is a low-level API. Most users should use the `highlight()` function instead, which calls `tokenize()` internally.
+</Note>

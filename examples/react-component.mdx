@@ -1,0 +1,474 @@
+---
+title: 'Building a Reusable CodeBlock Component'
+description: 'Learn how to create a production-ready, reusable CodeBlock component with Code Syntactic Sugar'
+---
+
+## Overview
+
+This guide demonstrates how to build a flexible, reusable `CodeBlock` component that you can use throughout your React application. We'll cover basic usage, prop handling, and adding useful features like language labels and copy-to-clipboard functionality.
+
+## Basic CodeBlock Component
+
+Start with a simple component that accepts code as a prop:
+
+```jsx CodeBlock.jsx
+import { highlight } from 'code-syntactic-sugar';
+
+export function CodeBlock({ code, language = 'javascript' }) {
+  const highlightedCode = highlight(code);
+
+  return (
+    <div className="code-block">
+      <pre>
+        <code>{highlightedCode}</code>
+      </pre>
+    </div>
+  );
+}
+```
+
+### Usage
+
+```jsx App.jsx
+import { CodeBlock } from './CodeBlock';
+
+function App() {
+  const exampleCode = `
+const greeting = "Hello, World!";
+console.log(greeting);
+  `.trim();
+
+  return (
+    <div>
+      <h1>Code Example</h1>
+      <CodeBlock code={exampleCode} />
+    </div>
+  );
+}
+```
+
+## Enhanced CodeBlock with Features
+
+Let's enhance the component with language labels, copy functionality, and line highlighting:
+
+<CodeGroup>
+
+```jsx CodeBlock.jsx
+import { highlight } from 'code-syntactic-sugar';
+import { useState } from 'react';
+import './CodeBlock.css';
+
+export function CodeBlock({ 
+  code, 
+  language = 'javascript',
+  showLineNumbers = false,
+  highlightedLines = [],
+  addedLines = [],
+  removedLines = [],
+  showCopyButton = true,
+  fileName
+}) {
+  const [copied, setCopied] = useState(false);
+
+  const highlightedCode = highlight(code, {
+    modifiers: {
+      highlightedLines,
+      addedLines,
+      removedLines,
+    },
+  });
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(code);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="code-block">
+      {(fileName || language || showCopyButton) && (
+        <div className="code-block-header">
+          <div className="code-block-info">
+            {fileName && <span className="file-name">{fileName}</span>}
+            {!fileName && language && (
+              <span className="language-label">{language}</span>
+            )}
+          </div>
+          {showCopyButton && (
+            <button 
+              className="copy-button" 
+              onClick={handleCopy}
+              aria-label="Copy code to clipboard"
+            >
+              {copied ? 'Copied!' : 'Copy'}
+            </button>
+          )}
+        </div>
+      )}
+      <pre className={showLineNumbers ? 'with-line-numbers' : ''}>
+        <code>{highlightedCode}</code>
+      </pre>
+    </div>
+  );
+}
+```
+
+```css CodeBlock.css
+.code-block {
+  border-radius: 8px;
+  overflow: hidden;
+  background: #1e1e1e;
+  margin: 1rem 0;
+}
+
+.code-block-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: #2d2d2d;
+  border-bottom: 1px solid #404040;
+}
+
+.code-block-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.file-name {
+  font-family: monospace;
+  font-size: 0.875rem;
+  color: #e0e0e0;
+  font-weight: 500;
+}
+
+.language-label {
+  font-family: monospace;
+  font-size: 0.75rem;
+  color: #a0a0a0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.copy-button {
+  background: #404040;
+  color: #e0e0e0;
+  border: none;
+  padding: 0.375rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.copy-button:hover {
+  background: #505050;
+}
+
+pre {
+  margin: 0;
+  padding: 1rem;
+  overflow-x: auto;
+}
+
+pre code {
+  font-family: 'Fira Code', 'Monaco', 'Courier New', monospace;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  display: block;
+}
+
+/* Line numbers */
+pre.with-line-numbers code {
+  counter-reset: css-line-number;
+}
+
+.css__line::before {
+  counter-increment: css-line-number;
+  content: counter(css-line-number);
+  display: inline-block;
+  width: 2.5rem;
+  margin-right: 1.5rem;
+  text-align: right;
+  color: #6e7681;
+  user-select: none;
+}
+
+/* Line modifiers */
+.css__line[data-highlighted-line] {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-left: 3px solid #fbbf24;
+  padding-left: 0.5rem;
+  margin-left: -0.5rem;
+}
+
+.css__line[data-added-line] {
+  background-color: rgba(34, 197, 94, 0.1);
+  border-left: 3px solid #22c55e;
+  padding-left: 0.5rem;
+  margin-left: -0.5rem;
+}
+
+.css__line[data-removed-line] {
+  background-color: rgba(239, 68, 68, 0.1);
+  border-left: 3px solid #ef4444;
+  padding-left: 0.5rem;
+  margin-left: -0.5rem;
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+/* Syntax highlighting theme */
+:root {
+  --css-class: #4ec9b0;
+  --css-identifier: #9cdcfe;
+  --css-sign: #d4d4d4;
+  --css-property: #9cdcfe;
+  --css-entity: #dcdcaa;
+  --css-jsxliterals: #569cd6;
+  --css-string: #ce9178;
+  --css-keyword: #c586c0;
+  --css-comment: #6a9955;
+}
+```
+
+</CodeGroup>
+
+## Usage Examples
+
+<Tabs>
+  <Tab title="Basic Example">
+    ```jsx
+    import { CodeBlock } from './CodeBlock';
+
+    function Example() {
+      const code = `
+function fibonacci(n) {
+  if (n <= 1) return n;
+  return fibonacci(n - 1) + fibonacci(n - 2);
+}
+      `.trim();
+
+      return <CodeBlock code={code} language="javascript" />;
+    }
+    ```
+  </Tab>
+  
+  <Tab title="With Line Numbers">
+    ```jsx
+    import { CodeBlock } from './CodeBlock';
+
+    function Example() {
+      const code = `
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+
+function App() {
+  return <h1>Hello, React!</h1>;
+}
+
+const root = createRoot(document.getElementById('root'));
+root.render(<App />);
+      `.trim();
+
+      return (
+        <CodeBlock 
+          code={code} 
+          language="jsx"
+          showLineNumbers={true}
+        />
+      );
+    }
+    ```
+  </Tab>
+
+  <Tab title="With Highlighting">
+    ```jsx
+    import { CodeBlock } from './CodeBlock';
+
+    function Example() {
+      const code = `
+const oldValue = 10;
+const newValue = 20;
+const result = newValue * 2;
+console.log('Result:', result);
+console.log('Calculation complete');
+      `.trim();
+
+      return (
+        <CodeBlock 
+          code={code}
+          fileName="calculations.js"
+          highlightedLines={[3, 4]}
+          addedLines={[2]}
+          removedLines={[1]}
+          showLineNumbers={true}
+        />
+      );
+    }
+    ```
+  </Tab>
+
+  <Tab title="With File Name">
+    ```jsx
+    import { CodeBlock } from './CodeBlock';
+
+    function Example() {
+      const code = `
+export default function Button({ children, onClick }) {
+  return (
+    <button 
+      onClick={onClick}
+      className="px-4 py-2 bg-blue-500 text-white rounded"
+    >
+      {children}
+    </button>
+  );
+}
+      `.trim();
+
+      return (
+        <CodeBlock 
+          code={code}
+          fileName="components/Button.jsx"
+          showLineNumbers={true}
+        />
+      );
+    }
+    ```
+  </Tab>
+</Tabs>
+
+<Note>
+  The `highlight` function returns React elements directly, so you don't need to use `dangerouslySetInnerHTML`. This makes it safer and more React-friendly than other syntax highlighting libraries.
+</Note>
+
+## TypeScript Support
+
+For TypeScript projects, create a typed version of the component:
+
+```tsx CodeBlock.tsx
+import { highlight, CodeSyntacticSugarConfig } from 'code-syntactic-sugar';
+import { useState } from 'react';
+import './CodeBlock.css';
+
+interface CodeBlockProps {
+  code: string;
+  language?: string;
+  showLineNumbers?: boolean;
+  highlightedLines?: number[];
+  addedLines?: number[];
+  removedLines?: number[];
+  showCopyButton?: boolean;
+  fileName?: string;
+}
+
+export function CodeBlock({ 
+  code, 
+  language = 'javascript',
+  showLineNumbers = false,
+  highlightedLines = [],
+  addedLines = [],
+  removedLines = [],
+  showCopyButton = true,
+  fileName
+}: CodeBlockProps) {
+  const [copied, setCopied] = useState<boolean>(false);
+
+  const config: CodeSyntacticSugarConfig = {
+    modifiers: {
+      highlightedLines: highlightedLines.length > 0 
+        ? (highlightedLines as [number, ...number[]]) 
+        : undefined,
+      addedLines: addedLines.length > 0 
+        ? (addedLines as [number, ...number[]]) 
+        : undefined,
+      removedLines: removedLines.length > 0 
+        ? (removedLines as [number, ...number[]]) 
+        : undefined,
+    },
+  };
+
+  const highlightedCode = highlight(code, config);
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(code);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="code-block">
+      {(fileName || language || showCopyButton) && (
+        <div className="code-block-header">
+          <div className="code-block-info">
+            {fileName && <span className="file-name">{fileName}</span>}
+            {!fileName && language && (
+              <span className="language-label">{language}</span>
+            )}
+          </div>
+          {showCopyButton && (
+            <button 
+              className="copy-button" 
+              onClick={handleCopy}
+              aria-label="Copy code to clipboard"
+            >
+              {copied ? 'Copied!' : 'Copy'}
+            </button>
+          )}
+        </div>
+      )}
+      <pre className={showLineNumbers ? 'with-line-numbers' : ''}>
+        <code>{highlightedCode}</code>
+      </pre>
+    </div>
+  );
+}
+```
+
+<Tip>
+  When using TypeScript, the `modifiers` configuration requires non-empty tuples. Always check if your arrays have elements before passing them to the config.
+</Tip>
+
+## Best Practices
+
+<Card title="Performance Optimization" icon="zap">
+  For code blocks that don't change frequently, consider memoizing the highlighted output:
+  
+  ```jsx
+  import { useMemo } from 'react';
+  import { highlight } from 'code-syntactic-sugar';
+
+  function CodeBlock({ code, highlightedLines }) {
+    const highlightedCode = useMemo(
+      () => highlight(code, { 
+        modifiers: { highlightedLines } 
+      }),
+      [code, highlightedLines]
+    );
+
+    return (
+      <pre>
+        <code>{highlightedCode}</code>
+      </pre>
+    );
+  }
+  ```
+</Card>
+
+<Card title="Accessibility" icon="universal-access">
+  Always include proper ARIA labels and semantic HTML:
+  
+  - Use `<pre>` and `<code>` tags for semantic structure
+  - Add `aria-label` to interactive buttons
+  - Ensure sufficient color contrast for syntax highlighting
+  - Consider adding a "language" announcement for screen readers
+</Card>
+
+<Card title="Styling Considerations" icon="palette">
+  - Use CSS custom properties for theme flexibility
+  - Ensure line numbers don't interfere with text selection
+  - Make the copy button visible on hover for better UX
+  - Test with different font families and sizes
+</Card>

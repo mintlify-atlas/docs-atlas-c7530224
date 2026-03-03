@@ -1,0 +1,327 @@
+---
+title: Types
+description: TypeScript type definitions exported by Code Syntactic Sugar
+---
+
+Code Syntactic Sugar exports several TypeScript types that define the structure of tokens, lines, and configuration options.
+
+## Token
+
+Represents a code token as a tuple of token type index and token value.
+
+```typescript
+type Token = [number, string];
+```
+
+**Structure:**
+- `[0]` (number): Index of the token type (see [TokenType](#tokentype))
+- `[1]` (string): The actual text content of the token
+
+**Example:**
+```typescript
+const token: Token = [1, "const"]; // keyword token
+const token2: Token = [0, "myVariable"]; // identifier token
+```
+
+---
+
+## TokenType
+
+Union type of all possible token type strings.
+
+```typescript
+type TokenType = (typeof types)[number];
+```
+
+**Possible Values:**
+- `"identifier"` - Variable names, function names
+- `"keyword"` - JavaScript keywords (if, const, function, etc.)
+- `"string"` - String literals
+- `"class"` - Class names, numbers, null
+- `"property"` - Object properties
+- `"entity"` - Special entities
+- `"jsxliterals"` - JSX literal values
+- `"sign"` - Operators and punctuation
+- `"comment"` - Comments
+- `"break"` - Line breaks
+- `"space"` - Whitespace
+
+---
+
+## Child
+
+Represents a single token element in the rendered output.
+
+```typescript
+type Child = {
+  type: "element";
+  tagName: "span";
+  children: Readonly<
+    [
+      {
+        type: "text";
+        value: string;
+      },
+    ]
+  >;
+  properties: Readonly<{
+    className: `css__token--${TokenType}`;
+    style: CSSProperties;
+  }>;
+};
+```
+
+<Expandable title="Properties">
+  <ResponseField name="type" type="'element'" required>
+    Always `"element"` to indicate this is an element node
+  </ResponseField>
+  
+  <ResponseField name="tagName" type="'span'" required>
+    Always `"span"` - the HTML tag name
+  </ResponseField>
+  
+  <ResponseField name="children" type="Readonly<[{ type: 'text'; value: string }]>" required>
+    Read-only array containing a single text node with the token's value
+  </ResponseField>
+  
+  <ResponseField name="properties" type="object" required>
+    Element properties including className and style
+    
+    <Expandable title="properties fields">
+      <ResponseField name="className" type="string" required>
+        CSS class name in the format `css__token--{tokenType}`
+      </ResponseField>
+      
+      <ResponseField name="style" type="CSSProperties" required>
+        React CSSProperties object for inline styles
+      </ResponseField>
+    </Expandable>
+  </ResponseField>
+</Expandable>
+
+---
+
+## Children
+
+Array of child token elements.
+
+```typescript
+type Children = Readonly<Child[]>;
+```
+
+A read-only array of [Child](#child) elements representing all tokens in a line.
+
+---
+
+## Line
+
+Represents a complete line of code with all its tokens.
+
+```typescript
+type Line = {
+  type: "element";
+  tagName: "span";
+  children: Children;
+  properties: {
+    className: "css__line";
+  };
+};
+```
+
+<Expandable title="Properties">
+  <ResponseField name="type" type="'element'" required>
+    Always `"element"` to indicate this is an element node
+  </ResponseField>
+  
+  <ResponseField name="tagName" type="'span'" required>
+    Always `"span"` - the HTML tag name for the line
+  </ResponseField>
+  
+  <ResponseField name="children" type="Children" required>
+    Array of [Child](#child) elements representing all tokens in this line
+  </ResponseField>
+  
+  <ResponseField name="properties" type="object" required>
+    <Expandable title="properties fields">
+      <ResponseField name="className" type="'css__line'" required>
+        Always `"css__line"` - CSS class for the line
+      </ResponseField>
+    </Expandable>
+  </ResponseField>
+</Expandable>
+
+**Example:**
+```typescript
+const line: Line = {
+  type: "element",
+  tagName: "span",
+  children: [
+    {
+      type: "element",
+      tagName: "span",
+      children: [{ type: "text", value: "const" }],
+      properties: {
+        className: "css__token--keyword",
+        style: { color: "#ff79c6" }
+      }
+    },
+    // ... more tokens
+  ],
+  properties: {
+    className: "css__line"
+  }
+};
+```
+
+---
+
+## Modifier
+
+String literal type for line modifiers.
+
+```typescript
+type Modifier = `${(typeof modifiers)[number]}-line`;
+```
+
+**Possible Values:**
+- `"highlighted-line"` - Highlights the line
+- `"added-line"` - Marks the line as added (green background)
+- `"removed-line"` - Marks the line as removed (red background)
+
+---
+
+## Modifiers
+
+Non-empty array of modifier strings.
+
+```typescript
+type Modifiers = [Modifier, ...Modifier[]];
+```
+
+A tuple type ensuring at least one [Modifier](#modifier) is present.
+
+**Example:**
+```typescript
+const mods: Modifiers = ["highlighted-line"];
+const multiMods: Modifiers = ["highlighted-line", "added-line"];
+```
+
+---
+
+## LineNumbers
+
+Non-empty array of line numbers.
+
+```typescript
+type LineNumbers = [number, ...number[]];
+```
+
+A tuple type ensuring at least one line number is present. Used to specify which lines should have modifiers applied.
+
+**Example:**
+```typescript
+const lines: LineNumbers = [1, 3, 5, 7];
+```
+
+---
+
+## LineWithModifiers
+
+Extends [Line](#line) with optional modifiers.
+
+```typescript
+type LineWithModifiers = Line & {
+  modifiers?: Modifiers;
+};
+```
+
+<Expandable title="Properties">
+  <ResponseField name="...Line" type="Line" required>
+    Inherits all properties from [Line](#line)
+  </ResponseField>
+  
+  <ResponseField name="modifiers" type="Modifiers">
+    Optional array of [Modifier](#modifier) strings to apply to this line
+  </ResponseField>
+</Expandable>
+
+**Example:**
+```typescript
+const lineWithMods: LineWithModifiers = {
+  type: "element",
+  tagName: "span",
+  children: [/* ... */],
+  properties: {
+    className: "css__line"
+  },
+  modifiers: ["highlighted-line", "added-line"]
+};
+```
+
+---
+
+## ModifierInputMap
+
+Configuration map for applying modifiers to specific line numbers.
+
+```typescript
+type ModifierInputMap = Partial<
+  Record<`${(typeof modifiers)[number]}Lines`, LineNumbers>
+>;
+```
+
+<Expandable title="Properties">
+  <ResponseField name="highlightedLines" type="LineNumbers">
+    Array of line numbers to highlight
+  </ResponseField>
+  
+  <ResponseField name="addedLines" type="LineNumbers">
+    Array of line numbers to mark as added
+  </ResponseField>
+  
+  <ResponseField name="removedLines" type="LineNumbers">
+    Array of line numbers to mark as removed
+  </ResponseField>
+</Expandable>
+
+**Example:**
+```typescript
+const modifiers: ModifierInputMap = {
+  highlightedLines: [1, 3, 5],
+  addedLines: [2, 4],
+  removedLines: [6]
+};
+```
+
+---
+
+## CodeSyntacticSugarConfig
+
+Configuration object for the Code Syntactic Sugar library.
+
+```typescript
+type CodeSyntacticSugarConfig = {
+  modifiers?: ModifierInputMap;
+};
+```
+
+<Expandable title="Properties">
+  <ResponseField name="modifiers" type="ModifierInputMap">
+    Optional [ModifierInputMap](#modifierinputmap) specifying which lines should have modifiers applied
+  </ResponseField>
+</Expandable>
+
+**Example:**
+```typescript
+import { highlight } from "code-syntactic-sugar";
+
+const config: CodeSyntacticSugarConfig = {
+  modifiers: {
+    highlightedLines: [1, 2, 3],
+    addedLines: [5],
+    removedLines: [7, 8]
+  }
+};
+
+const result = highlight(code, config);
+```

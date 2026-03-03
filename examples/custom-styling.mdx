@@ -1,0 +1,795 @@
+---
+title: 'Advanced Styling & Custom Themes'
+description: 'Learn how to create custom themes and advanced styling for Code Syntactic Sugar'
+---
+
+## Overview
+
+Code Syntactic Sugar uses CSS custom properties and class names to provide complete control over syntax highlighting appearance. This guide covers creating custom themes, implementing dark/light mode, and advanced styling techniques.
+
+## Understanding Token Types
+
+Code Syntactic Sugar classifies code into 11 token types, each with its own styling:
+
+```css
+/**
+ * Token types and their CSS variables:
+ *
+ * --css-identifier     - Variable names, function names
+ * --css-keyword        - Reserved keywords (const, let, if, function, etc.)
+ * --css-string         - String literals
+ * --css-class          - Class names, numbers, null
+ * --css-property       - Object properties
+ * --css-entity         - Built-in functions and methods
+ * --css-jsxliterals    - JSX tag names and attributes
+ * --css-sign           - Operators and punctuation
+ * --css-comment        - Comments
+ * --css-break          - Line breaks
+ * --css-space          - Whitespace
+ */
+```
+
+## Custom Color Themes
+
+<Tabs>
+  <Tab title="VS Code Dark+ Theme">
+    ```css
+    :root {
+      --css-class: #4ec9b0;
+      --css-identifier: #9cdcfe;
+      --css-sign: #d4d4d4;
+      --css-property: #9cdcfe;
+      --css-entity: #dcdcaa;
+      --css-jsxliterals: #569cd6;
+      --css-string: #ce9178;
+      --css-keyword: #c586c0;
+      --css-comment: #6a9955;
+    }
+
+    .code-block {
+      background: #1e1e1e;
+      color: #d4d4d4;
+    }
+
+    .code-block pre {
+      background: #1e1e1e;
+    }
+
+    .css__line::before {
+      color: #858585;
+    }
+    ```
+  </Tab>
+
+  <Tab title="GitHub Light Theme">
+    ```css
+    :root {
+      --css-class: #0550ae;
+      --css-identifier: #24292f;
+      --css-sign: #24292f;
+      --css-property: #0550ae;
+      --css-entity: #6639ba;
+      --css-jsxliterals: #0550ae;
+      --css-string: #0a3069;
+      --css-keyword: #cf222e;
+      --css-comment: #6e7781;
+    }
+
+    .code-block {
+      background: #ffffff;
+      color: #24292f;
+      border: 1px solid #d0d7de;
+    }
+
+    .code-block pre {
+      background: #f6f8fa;
+    }
+
+    .css__line::before {
+      color: #57606a;
+    }
+    ```
+  </Tab>
+
+  <Tab title="Dracula Theme">
+    ```css
+    :root {
+      --css-class: #8be9fd;
+      --css-identifier: #f8f8f2;
+      --css-sign: #f8f8f2;
+      --css-property: #50fa7b;
+      --css-entity: #50fa7b;
+      --css-jsxliterals: #ff79c6;
+      --css-string: #f1fa8c;
+      --css-keyword: #ff79c6;
+      --css-comment: #6272a4;
+    }
+
+    .code-block {
+      background: #282a36;
+      color: #f8f8f2;
+    }
+
+    .code-block pre {
+      background: #282a36;
+    }
+
+    .css__line::before {
+      color: #6272a4;
+    }
+    ```
+  </Tab>
+
+  <Tab title="Nord Theme">
+    ```css
+    :root {
+      --css-class: #8fbcbb;
+      --css-identifier: #d8dee9;
+      --css-sign: #81a1c1;
+      --css-property: #88c0d0;
+      --css-entity: #88c0d0;
+      --css-jsxliterals: #81a1c1;
+      --css-string: #a3be8c;
+      --css-keyword: #81a1c1;
+      --css-comment: #616e88;
+    }
+
+    .code-block {
+      background: #2e3440;
+      color: #d8dee9;
+    }
+
+    .code-block pre {
+      background: #2e3440;
+    }
+
+    .css__line::before {
+      color: #4c566a;
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Dark/Light Mode Support
+
+Implement automatic theme switching based on user preferences:
+
+<CodeGroup>
+
+```css styles/themes.css
+/* Light mode (default) */
+:root {
+  --css-class: #0550ae;
+  --css-identifier: #24292f;
+  --css-sign: #24292f;
+  --css-property: #0550ae;
+  --css-entity: #6639ba;
+  --css-jsxliterals: #0550ae;
+  --css-string: #0a3069;
+  --css-keyword: #cf222e;
+  --css-comment: #6e7781;
+
+  --code-bg: #ffffff;
+  --code-text: #24292f;
+  --code-border: #d0d7de;
+  --code-header-bg: #f6f8fa;
+  --line-number-color: #57606a;
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --css-class: #4ec9b0;
+    --css-identifier: #9cdcfe;
+    --css-sign: #d4d4d4;
+    --css-property: #9cdcfe;
+    --css-entity: #dcdcaa;
+    --css-jsxliterals: #569cd6;
+    --css-string: #ce9178;
+    --css-keyword: #c586c0;
+    --css-comment: #6a9955;
+
+    --code-bg: #1e1e1e;
+    --code-text: #d4d4d4;
+    --code-border: #404040;
+    --code-header-bg: #2d2d2d;
+    --line-number-color: #858585;
+  }
+}
+
+/* Manual theme override classes */
+[data-theme="light"] {
+  --css-class: #0550ae;
+  --css-identifier: #24292f;
+  --css-sign: #24292f;
+  --css-property: #0550ae;
+  --css-entity: #6639ba;
+  --css-jsxliterals: #0550ae;
+  --css-string: #0a3069;
+  --css-keyword: #cf222e;
+  --css-comment: #6e7781;
+
+  --code-bg: #ffffff;
+  --code-text: #24292f;
+  --code-border: #d0d7de;
+  --code-header-bg: #f6f8fa;
+  --line-number-color: #57606a;
+}
+
+[data-theme="dark"] {
+  --css-class: #4ec9b0;
+  --css-identifier: #9cdcfe;
+  --css-sign: #d4d4d4;
+  --css-property: #9cdcfe;
+  --css-entity: #dcdcaa;
+  --css-jsxliterals: #569cd6;
+  --css-string: #ce9178;
+  --css-keyword: #c586c0;
+  --css-comment: #6a9955;
+
+  --code-bg: #1e1e1e;
+  --code-text: #d4d4d4;
+  --code-border: #404040;
+  --code-header-bg: #2d2d2d;
+  --line-number-color: #858585;
+}
+
+/* Apply theme variables */
+.code-block {
+  background: var(--code-bg);
+  color: var(--code-text);
+  border: 1px solid var(--code-border);
+}
+
+.code-block-header {
+  background: var(--code-header-bg);
+  border-bottom: 1px solid var(--code-border);
+}
+
+.css__line::before {
+  color: var(--line-number-color);
+}
+```
+
+```tsx components/ThemeProvider.tsx
+'use client';
+
+import { createContext, useContext, useEffect, useState } from 'react';
+
+type Theme = 'light' | 'dark' | 'system';
+
+interface ThemeContextType {
+  theme: Theme;
+  setTheme: (theme: Theme) => void;
+}
+
+const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+
+export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const [theme, setTheme] = useState<Theme>('system');
+
+  useEffect(() => {
+    const root = window.document.documentElement;
+    
+    if (theme === 'system') {
+      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)')
+        .matches ? 'dark' : 'light';
+      root.setAttribute('data-theme', systemTheme);
+    } else {
+      root.setAttribute('data-theme', theme);
+    }
+  }, [theme]);
+
+  return (
+    <ThemeContext.Provider value={{ theme, setTheme }}>
+      {children}
+    </ThemeContext.Provider>
+  );
+}
+
+export function useTheme() {
+  const context = useContext(ThemeContext);
+  if (context === undefined) {
+    throw new Error('useTheme must be used within a ThemeProvider');
+  }
+  return context;
+}
+```
+
+</CodeGroup>
+
+## Advanced Line Styling
+
+### Custom Line Modifiers
+
+Create sophisticated line highlighting styles:
+
+```css
+/* Highlighted lines with glow effect */
+.css__line[data-highlighted-line] {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(255, 255, 255, 0.02) 100%
+  );
+  border-left: 3px solid #fbbf24;
+  padding-left: 0.75rem;
+  margin-left: -0.75rem;
+  box-shadow: inset 0 0 0 1px rgba(251, 191, 36, 0.1);
+}
+
+/* Added lines with green accent */
+.css__line[data-added-line] {
+  background: linear-gradient(
+    90deg,
+    rgba(34, 197, 94, 0.15) 0%,
+    rgba(34, 197, 94, 0.05) 100%
+  );
+  border-left: 3px solid #22c55e;
+  padding-left: 0.75rem;
+  margin-left: -0.75rem;
+  position: relative;
+}
+
+.css__line[data-added-line]::after {
+  content: '+';
+  position: absolute;
+  left: 0.25rem;
+  color: #22c55e;
+  font-weight: bold;
+}
+
+/* Removed lines with red accent */
+.css__line[data-removed-line] {
+  background: linear-gradient(
+    90deg,
+    rgba(239, 68, 68, 0.15) 0%,
+    rgba(239, 68, 68, 0.05) 100%
+  );
+  border-left: 3px solid #ef4444;
+  padding-left: 0.75rem;
+  margin-left: -0.75rem;
+  text-decoration: line-through;
+  opacity: 0.8;
+  position: relative;
+}
+
+.css__line[data-removed-line]::after {
+  content: '-';
+  position: absolute;
+  left: 0.25rem;
+  color: #ef4444;
+  font-weight: bold;
+}
+```
+
+### Focus Lines
+
+Dim non-focused lines for emphasis:
+
+```css
+/* When any line is focused, dim others */
+.code-block.has-focus .css__line {
+  opacity: 0.4;
+  transition: opacity 0.3s ease;
+}
+
+.code-block.has-focus .css__line[data-highlighted-line] {
+  opacity: 1;
+}
+
+.code-block.has-focus .css__line:hover {
+  opacity: 0.8;
+}
+```
+
+## Token-Level Customization
+
+Style specific token types using class names:
+
+```css
+/* Make keywords bold */
+.css__token--keyword {
+  font-weight: 600;
+}
+
+/* Add background to strings */
+.css__token--string {
+  background: rgba(206, 145, 120, 0.1);
+  padding: 0.125rem 0.25rem;
+  border-radius: 2px;
+}
+
+/* Style comments with italic */
+.css__token--comment {
+  font-style: italic;
+  opacity: 0.8;
+}
+
+/* Underline JSX literals */
+.css__token--jsxliterals {
+  text-decoration: underline;
+  text-decoration-color: rgba(86, 156, 214, 0.3);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+/* Bold class names and numbers */
+.css__token--class {
+  font-weight: 600;
+}
+```
+
+## Advanced Line Numbers
+
+<Tabs>
+  <Tab title="Styled Line Numbers">
+    ```css
+    pre code {
+      counter-reset: css-line-number;
+    }
+
+    .css__line {
+      display: block;
+      padding-left: 4rem;
+      position: relative;
+    }
+
+    .css__line::before {
+      counter-increment: css-line-number;
+      content: counter(css-line-number);
+      position: absolute;
+      left: 0;
+      width: 3rem;
+      text-align: right;
+      color: #6e7681;
+      user-select: none;
+      font-variant-numeric: tabular-nums;
+      padding-right: 1rem;
+      border-right: 1px solid #30363d;
+    }
+
+    /* Highlight current line number on hover */
+    .css__line:hover::before {
+      color: #58a6ff;
+    }
+    ```
+  </Tab>
+
+  <Tab title="Selectable Line Numbers">
+    ```css
+    /* Make line numbers clickable for line selection */
+    .css__line {
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .css__line::before {
+      cursor: pointer;
+      padding: 0 0.75rem;
+      margin-right: 1rem;
+    }
+
+    .css__line:hover {
+      background-color: rgba(255, 255, 255, 0.03);
+    }
+
+    .css__line.selected {
+      background-color: rgba(88, 166, 255, 0.15);
+    }
+
+    .css__line.selected::before {
+      color: #58a6ff;
+      font-weight: 600;
+    }
+    ```
+  </Tab>
+
+  <Tab title="Diff-Style Numbers">
+    ```css
+    /* Different styling for added/removed line numbers */
+    .css__line[data-added-line]::before {
+      content: '+' counter(css-line-number);
+      color: #22c55e;
+      background: rgba(34, 197, 94, 0.1);
+    }
+
+    .css__line[data-removed-line]::before {
+      content: '-' counter(css-line-number);
+      color: #ef4444;
+      background: rgba(239, 68, 68, 0.1);
+    }
+
+    .css__line[data-highlighted-line]::before {
+      background: rgba(251, 191, 36, 0.1);
+      color: #fbbf24;
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Complete Custom Theme Example
+
+Here's a full implementation of a custom "Sunset" theme:
+
+<CodeGroup>
+
+```css sunset-theme.css
+/* Sunset Theme - Warm colors inspired by sunset */
+.theme-sunset {
+  --css-class: #ff8c42;
+  --css-identifier: #ffd5a3;
+  --css-sign: #ffb88c;
+  --css-property: #ff8c42;
+  --css-entity: #ff6b9d;
+  --css-jsxliterals: #c364c7;
+  --css-string: #ffd93d;
+  --css-keyword: #ff6b9d;
+  --css-comment: #a8a29e;
+
+  --code-bg: linear-gradient(135deg, #2d1b3d 0%, #1a1520 100%);
+  --code-text: #ffd5a3;
+  --code-border: #4a3352;
+  --code-header-bg: #2d1b3d;
+  --line-number-color: #78716c;
+}
+
+.theme-sunset .code-block {
+  background: var(--code-bg);
+  color: var(--code-text);
+  border: 1px solid var(--code-border);
+  box-shadow: 0 10px 40px rgba(255, 107, 157, 0.1);
+}
+
+.theme-sunset .code-block-header {
+  background: var(--code-header-bg);
+  border-bottom: 1px solid var(--code-border);
+  backdrop-filter: blur(10px);
+}
+
+.theme-sunset .css__line::before {
+  color: var(--line-number-color);
+  font-weight: 500;
+}
+
+.theme-sunset .css__line[data-highlighted-line] {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 140, 66, 0.15) 0%,
+    rgba(255, 140, 66, 0.05) 100%
+  );
+  border-left: 3px solid #ff8c42;
+  box-shadow: inset 0 0 20px rgba(255, 140, 66, 0.1);
+}
+
+.theme-sunset .copy-button {
+  background: linear-gradient(135deg, #ff6b9d 0%, #c364c7 100%);
+  color: #ffffff;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.theme-sunset .copy-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(255, 107, 157, 0.4);
+}
+```
+
+```tsx SunsetCodeBlock.tsx
+'use client';
+
+import { highlight } from 'code-syntactic-sugar';
+import { useState } from 'react';
+import './sunset-theme.css';
+
+interface SunsetCodeBlockProps {
+  code: string;
+  language?: string;
+  showLineNumbers?: boolean;
+  highlightedLines?: number[];
+}
+
+export function SunsetCodeBlock({
+  code,
+  language = 'javascript',
+  showLineNumbers = false,
+  highlightedLines = [],
+}: SunsetCodeBlockProps) {
+  const [copied, setCopied] = useState(false);
+
+  const highlightedCode = highlight(code, {
+    modifiers: {
+      highlightedLines: highlightedLines.length > 0
+        ? (highlightedLines as [number, ...number[]])
+        : undefined,
+    },
+  });
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(code);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="theme-sunset">
+      <div className="code-block">
+        <div className="code-block-header">
+          <span className="language-label">{language}</span>
+          <button className="copy-button" onClick={handleCopy}>
+            {copied ? '✓ Copied!' : 'Copy'}
+          </button>
+        </div>
+        <pre className={showLineNumbers ? 'with-line-numbers' : ''}>
+          <code>{highlightedCode}</code>
+        </pre>
+      </div>
+    </div>
+  );
+}
+```
+
+</CodeGroup>
+
+<Note>
+  When creating custom themes, ensure sufficient color contrast for accessibility. Use tools like the WebAIM Contrast Checker to verify your color choices meet WCAG guidelines.
+</Note>
+
+## Responsive Design
+
+Make code blocks mobile-friendly:
+
+```css
+/* Base styles */
+.code-block {
+  margin: 1rem 0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.code-block pre {
+  overflow-x: auto;
+  padding: 1rem;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .code-block {
+    margin: 1rem -1rem;
+    border-radius: 0;
+  }
+
+  .code-block pre {
+    font-size: 0.75rem;
+    padding: 0.75rem;
+  }
+
+  .code-block-header {
+    padding: 0.5rem 0.75rem;
+  }
+
+  /* Hide line numbers on small screens */
+  .css__line::before {
+    display: none;
+  }
+
+  /* Adjust for touch devices */
+  .copy-button {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.75rem;
+  }
+}
+
+/* Tablet and up */
+@media (min-width: 769px) {
+  .code-block pre {
+    font-size: 0.875rem;
+  }
+
+  .code-block code {
+    line-height: 1.6;
+  }
+}
+
+/* Desktop */
+@media (min-width: 1024px) {
+  .code-block {
+    margin: 1.5rem 0;
+  }
+
+  .code-block pre {
+    padding: 1.5rem;
+  }
+}
+```
+
+<Tip>
+  Use CSS custom properties (variables) for all theme values. This makes it easy to switch themes dynamically or support user preferences without duplicating code.
+</Tip>
+
+## Animation Effects
+
+Add smooth transitions and animations:
+
+```css
+/* Fade in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.code-block {
+  animation: fadeIn 0.4s ease-out;
+}
+
+/* Typing effect for code reveal */
+@keyframes typing {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+.code-block.typing .css__line {
+  overflow: hidden;
+  border-right: 2px solid;
+  white-space: nowrap;
+  animation: typing 2s steps(40) forwards;
+}
+
+/* Highlight pulse animation */
+@keyframes highlightPulse {
+  0%, 100% {
+    background-color: rgba(251, 191, 36, 0.1);
+  }
+  50% {
+    background-color: rgba(251, 191, 36, 0.2);
+  }
+}
+
+.css__line[data-highlighted-line].pulse {
+  animation: highlightPulse 2s ease-in-out infinite;
+}
+
+/* Smooth token transitions */
+.css__token--keyword,
+.css__token--string,
+.css__token--comment {
+  transition: all 0.2s ease;
+}
+
+.css__token--keyword:hover {
+  filter: brightness(1.2);
+}
+```
+
+## Best Practices
+
+<Card title="Performance" icon="gauge">
+  - Use CSS custom properties instead of inline styles
+  - Avoid complex animations on large code blocks
+  - Minimize use of expensive CSS properties like `box-shadow`
+  - Use `will-change` sparingly for animated elements
+</Card>
+
+<Card title="Accessibility" icon="universal-access">
+  - Maintain minimum 4.5:1 contrast ratio for code text
+  - Use `prefers-color-scheme` for automatic theme switching
+  - Ensure line numbers don't interfere with screen readers
+  - Add proper ARIA labels to interactive elements
+</Card>
+
+<Card title="Maintainability" icon="wrench">
+  - Define themes using CSS custom properties
+  - Keep token colors consistent within a theme
+  - Document your color choices and their purposes
+  - Use semantic names for CSS variables
+</Card>

@@ -1,0 +1,264 @@
+---
+title: Line Modifiers
+description: Visually highlight, mark as added, or mark as removed specific lines of code
+---
+
+## Overview
+
+Line modifiers allow you to apply visual effects to specific lines of code. This is particularly useful for:
+
+- Highlighting important lines
+- Showing code additions in tutorials or diffs
+- Indicating removed or deprecated code
+
+## Available Modifiers
+
+Code Syntactic Sugar supports three line modifiers:
+
+- **highlighted** - Emphasize specific lines
+- **added** - Mark lines as new additions
+- **removed** - Mark lines as deletions
+
+<Note>
+  If multiple modifiers are applied to the same line, the order of precedence is: highlighted → added → removed. Only the highest priority modifier will be applied.
+</Note>
+
+## Basic Usage
+
+Pass a configuration object with a `modifiers` property to the `highlight` function:
+
+```jsx
+import { highlight } from 'code-syntactic-sugar';
+import { createRoot } from 'react-dom/client';
+
+function CodeBlock() {
+  const code = `
+    let a = 1;
+    let b = 10;
+    const result = a + b;
+    console.log(a);
+    console.log(b);
+    console.log(result);
+  `.trim();
+
+  const codeLines = highlight(code, {
+    modifiers: {
+      highlightedLines: [1, 2],
+      addedLines: [4, 5],
+      removedLines: [3, 0, -1, 10, 4],
+    },
+  });
+
+  return <code>{codeLines}</code>;
+}
+
+const root = createRoot(document.querySelector('#app > pre'));
+root.render(<CodeBlock />);
+```
+
+### How Line Numbers Work
+
+- Line numbers are **1-indexed** (first line is line 1)
+- Out-of-bounds line numbers (0, negative, or beyond code length) are ignored
+- Duplicate line numbers are ignored
+
+## Configuration API
+
+The `modifiers` object accepts three optional properties:
+
+<ResponseField name="highlightedLines" type="number[]">
+  Array of line numbers to highlight. Has highest precedence.
+</ResponseField>
+
+<ResponseField name="addedLines" type="number[]">
+  Array of line numbers to mark as added. Has medium precedence.
+</ResponseField>
+
+<ResponseField name="removedLines" type="number[]">
+  Array of line numbers to mark as removed. Has lowest precedence.
+</ResponseField>
+
+## Styling Modifiers
+
+Add CSS to style lines with different modifiers using data attributes:
+
+```css
+.css_line[data-highlighted-line] {
+  background-color: #fefefe;
+}
+
+.css_line[data-added-line] {
+  background-color: #00ff00;
+}
+
+.css_line[data-removed-line] {
+  background-color: #ff0000;
+}
+```
+
+### Recommended Styles
+
+<Tabs>
+  <Tab title="Subtle">
+    ```css
+    .css_line[data-highlighted-line] {
+      background-color: rgba(255, 255, 0, 0.1);
+      border-left: 3px solid #ffd700;
+    }
+
+    .css_line[data-added-line] {
+      background-color: rgba(0, 255, 0, 0.1);
+      border-left: 3px solid #22c55e;
+    }
+
+    .css_line[data-removed-line] {
+      background-color: rgba(255, 0, 0, 0.1);
+      border-left: 3px solid #ef4444;
+      text-decoration: line-through;
+      opacity: 0.7;
+    }
+    ```
+  </Tab>
+  <Tab title="Bold">
+    ```css
+    .css_line[data-highlighted-line] {
+      background-color: #fff3cd;
+      box-shadow: inset 4px 0 0 #ffd700;
+      font-weight: 500;
+    }
+
+    .css_line[data-added-line] {
+      background-color: #d1fae5;
+      box-shadow: inset 4px 0 0 #10b981;
+    }
+
+    .css_line[data-added-line]::before {
+      content: '+ ';
+      color: #10b981;
+      font-weight: bold;
+    }
+
+    .css_line[data-removed-line] {
+      background-color: #fee2e2;
+      box-shadow: inset 4px 0 0 #ef4444;
+    }
+
+    .css_line[data-removed-line]::before {
+      content: '- ';
+      color: #ef4444;
+      font-weight: bold;
+    }
+    ```
+  </Tab>
+  <Tab title="GitHub Style">
+    ```css
+    .css_line[data-highlighted-line] {
+      background-color: #fff8c5;
+    }
+
+    .css_line[data-added-line] {
+      background-color: #e6ffec;
+    }
+
+    .css_line[data-added-line]::before {
+      content: '+';
+      color: #22863a;
+      margin-right: 8px;
+    }
+
+    .css_line[data-removed-line] {
+      background-color: #ffebe9;
+    }
+
+    .css_line[data-removed-line]::before {
+      content: '-';
+      color: #d73a49;
+      margin-right: 8px;
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Examples
+
+### Example 1: Highlighting Important Code
+
+```jsx
+const code = `
+function calculateTotal(items) {
+  let total = 0;
+  for (const item of items) {
+    total += item.price;
+  }
+  return total;
+}
+`.trim();
+
+const highlighted = highlight(code, {
+  modifiers: {
+    highlightedLines: [4], // Highlight the calculation line
+  },
+});
+```
+
+### Example 2: Showing Code Changes
+
+```jsx
+const code = `
+const oldFunction = () => {
+  return 'old';
+};
+const newFunction = () => {
+  return 'new';
+};
+`.trim();
+
+const highlighted = highlight(code, {
+  modifiers: {
+    removedLines: [1, 2, 3],
+    addedLines: [4, 5, 6],
+  },
+});
+```
+
+### Example 3: Multiple Modifier Types
+
+```jsx
+const code = `
+import React from 'react';
+import { useState } from 'react';
+
+function Counter() {
+  const [count, setCount] = useState(0);
+  return <button onClick={() => setCount(count + 1)}>{count}</button>;
+}
+`.trim();
+
+const highlighted = highlight(code, {
+  modifiers: {
+    removedLines: [1],           // Remove old import
+    addedLines: [2],             // Add new import
+    highlightedLines: [5, 6],    // Highlight component logic
+  },
+});
+```
+
+<Warning>
+  Remember that line 5 would be highlighted even if you also added it to `addedLines`, because highlighted has higher precedence.
+</Warning>
+
+## TypeScript Support
+
+The modifier configuration is fully typed:
+
+```typescript
+import { CodeSyntacticSugarConfig } from 'code-syntactic-sugar';
+
+const config: CodeSyntacticSugarConfig = {
+  modifiers: {
+    highlightedLines: [1, 2, 3],
+    addedLines: [4, 5],
+    removedLines: [6],
+  },
+};
+```

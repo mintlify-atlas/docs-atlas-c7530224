@@ -1,0 +1,331 @@
+---
+title: Line Numbers
+description: Add line numbers to your code blocks using CSS counters
+---
+
+## Overview
+
+Code Syntactic Sugar supports line numbers through CSS counters. Each line is wrapped in a `<span>` element with the `.css_line` class, making it easy to add automatic line numbering.
+
+## Basic Implementation
+
+Add the following CSS to your stylesheet to enable line numbers:
+
+```css
+pre code {
+  counter-reset: css-line-number;
+}
+
+.css_line::before {
+  counter-increment: css-line-number;
+  content: counter(css-line-number);
+  margin-right: 24px;
+  text-align: right;
+  color: #a4a4a4;
+}
+```
+
+### How It Works
+
+1. **Reset Counter**: `counter-reset` initializes a counter named `css-line-number` at the start of each code block
+2. **Increment**: `counter-increment` increases the counter for each `.css_line` element
+3. **Display**: `content: counter(css-line-number)` displays the current counter value
+4. **Styling**: Additional properties control appearance and spacing
+
+## Styling Options
+
+### Basic Line Numbers
+
+<Tabs>
+  <Tab title="Right Aligned">
+    ```css
+    pre code {
+      counter-reset: css-line-number;
+    }
+
+    .css_line::before {
+      counter-increment: css-line-number;
+      content: counter(css-line-number);
+      display: inline-block;
+      width: 2em;
+      margin-right: 24px;
+      text-align: right;
+      color: #a4a4a4;
+    }
+    ```
+  </Tab>
+  <Tab title="Left Aligned">
+    ```css
+    pre code {
+      counter-reset: css-line-number;
+    }
+
+    .css_line::before {
+      counter-increment: css-line-number;
+      content: counter(css-line-number);
+      display: inline-block;
+      width: 2em;
+      margin-right: 16px;
+      text-align: left;
+      color: #a4a4a4;
+    }
+    ```
+  </Tab>
+  <Tab title="With Separator">
+    ```css
+    pre code {
+      counter-reset: css-line-number;
+    }
+
+    .css_line::before {
+      counter-increment: css-line-number;
+      content: counter(css-line-number) ' | ';
+      display: inline-block;
+      margin-right: 12px;
+      text-align: right;
+      color: #a4a4a4;
+    }
+    ```
+  </Tab>
+</Tabs>
+
+### Advanced Styling
+
+<CodeGroup>
+```css Bordered
+pre code {
+  counter-reset: css-line-number;
+}
+
+.css_line::before {
+  counter-increment: css-line-number;
+  content: counter(css-line-number);
+  display: inline-block;
+  width: 3em;
+  margin-right: 16px;
+  padding-right: 16px;
+  text-align: right;
+  color: #6e7781;
+  border-right: 1px solid #d0d7de;
+}
+```
+
+```css Background
+pre code {
+  counter-reset: css-line-number;
+}
+
+.css_line {
+  display: flex;
+}
+
+.css_line::before {
+  counter-increment: css-line-number;
+  content: counter(css-line-number);
+  display: inline-block;
+  width: 3em;
+  margin-right: 16px;
+  text-align: center;
+  color: #6e7781;
+  background-color: #f6f8fa;
+  border-radius: 4px;
+}
+```
+
+```css Monospace
+pre code {
+  counter-reset: css-line-number;
+  font-family: 'Fira Code', 'Courier New', monospace;
+}
+
+.css_line::before {
+  counter-increment: css-line-number;
+  content: counter(css-line-number);
+  display: inline-block;
+  width: 2.5ch;
+  margin-right: 1em;
+  text-align: right;
+  color: #8b949e;
+  font-variant-numeric: tabular-nums;
+  user-select: none;
+}
+```
+</CodeGroup>
+
+## Dark Mode Support
+
+Adjust line number colors for dark mode:
+
+```css
+/* Light mode */
+.css_line::before {
+  color: #a4a4a4;
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+  .css_line::before {
+    color: #6e7681;
+  }
+}
+
+/* Or with a dark class */
+.dark .css_line::before {
+  color: #6e7681;
+}
+```
+
+## Line Numbers with Modifiers
+
+When using [line modifiers](/guides/line-modifiers), you can style line numbers differently:
+
+```css
+pre code {
+  counter-reset: css-line-number;
+}
+
+.css_line::before {
+  counter-increment: css-line-number;
+  content: counter(css-line-number);
+  display: inline-block;
+  width: 2em;
+  margin-right: 24px;
+  text-align: right;
+  color: #a4a4a4;
+}
+
+/* Highlighted line numbers */
+.css_line[data-highlighted-line]::before {
+  color: #f59e0b;
+  font-weight: bold;
+}
+
+/* Added line numbers */
+.css_line[data-added-line]::before {
+  color: #22c55e;
+}
+
+/* Removed line numbers */
+.css_line[data-removed-line]::before {
+  color: #ef4444;
+  text-decoration: line-through;
+}
+```
+
+## Preventing Selection
+
+To prevent line numbers from being copied when users select code:
+
+```css
+.css_line::before {
+  counter-increment: css-line-number;
+  content: counter(css-line-number);
+  display: inline-block;
+  width: 2em;
+  margin-right: 24px;
+  text-align: right;
+  color: #a4a4a4;
+  user-select: none; /* Prevents selection */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+}
+```
+
+<Note>
+  Using `user-select: none` ensures that when users copy code, line numbers won't be included in the clipboard.
+</Note>
+
+## Responsive Line Numbers
+
+Hide line numbers on smaller screens:
+
+```css
+pre code {
+  counter-reset: css-line-number;
+}
+
+.css_line::before {
+  counter-increment: css-line-number;
+  content: counter(css-line-number);
+  display: inline-block;
+  width: 2em;
+  margin-right: 24px;
+  text-align: right;
+  color: #a4a4a4;
+}
+
+/* Hide line numbers on mobile */
+@media (max-width: 640px) {
+  .css_line::before {
+    display: none;
+  }
+}
+```
+
+## Custom Starting Number
+
+Start line numbers from a specific value:
+
+```css
+pre code {
+  /* Start from line 10 */
+  counter-reset: css-line-number 9;
+}
+
+.css_line::before {
+  counter-increment: css-line-number;
+  content: counter(css-line-number);
+  display: inline-block;
+  width: 2em;
+  margin-right: 24px;
+  text-align: right;
+  color: #a4a4a4;
+}
+```
+
+<Warning>
+  Set the counter to one less than your desired starting number, as the counter increments before displaying.
+</Warning>
+
+## Complete Example
+
+Here's a complete example combining line numbers with styling:
+
+```css
+pre {
+  background-color: #f6f8fa;
+  border-radius: 6px;
+  padding: 16px;
+  overflow-x: auto;
+}
+
+pre code {
+  counter-reset: css-line-number;
+  font-family: 'Fira Code', monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  display: block;
+}
+
+.css_line {
+  display: block;
+  padding: 0 8px;
+}
+
+.css_line::before {
+  counter-increment: css-line-number;
+  content: counter(css-line-number);
+  display: inline-block;
+  width: 3em;
+  margin-right: 16px;
+  padding-right: 16px;
+  text-align: right;
+  color: #6e7781;
+  border-right: 1px solid #d0d7de;
+  user-select: none;
+}
+
+.css_line:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+```

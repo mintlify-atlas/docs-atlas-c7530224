@@ -1,0 +1,134 @@
+---
+title: Basic Usage
+description: Learn the core usage patterns for Code Syntactic Sugar in your React applications
+---
+
+## Installation
+
+First, install the package using npm:
+
+```bash
+npm install --save code-syntactic-sugar
+```
+
+<Note>
+  React must be installed for this package to work, as it produces React elements as output.
+</Note>
+
+## Your First Code Block
+
+The simplest way to use Code Syntactic Sugar is with the `highlight` function:
+
+```jsx
+import { highlight } from 'code-syntactic-sugar';
+import { createRoot } from 'react-dom/client';
+
+function CodeBlock() {
+  const code = `
+  const a = 10;
+  const b = 20;
+  console.log(a + b);
+  `.trim();
+
+  const codeLines = highlight(code);
+
+  return <code>{codeLines}</code>;
+}
+
+const root = createRoot(document.querySelector('#app > pre'));
+root.render(<CodeBlock />);
+```
+
+## How It Works
+
+Code Syntactic Sugar tokenizes your code string and returns React elements directly. This eliminates the need for `dangerouslySetInnerHTML`, making your code safer and more maintainable.
+
+### The highlight Function
+
+The `highlight` function accepts two parameters:
+
+1. **code** (string, required) - The code string to highlight
+2. **config** (CodeSyntacticSugarConfig, optional) - Configuration object for customization
+
+```jsx
+import { highlight } from 'code-syntactic-sugar';
+
+const reactElement = highlight(codeString, config);
+```
+
+## Using with Components
+
+You can easily integrate Code Syntactic Sugar into your React components:
+
+```jsx
+import { highlight } from 'code-syntactic-sugar';
+
+function MyCodeBlock({ code }) {
+  const highlighted = highlight(code);
+  
+  return (
+    <pre>
+      <code>{highlighted}</code>
+    </pre>
+  );
+}
+
+export default MyCodeBlock;
+```
+
+## Token Types
+
+Code Syntactic Sugar recognizes the following token types:
+
+- **identifier** - Variable and function names
+- **keyword** - JavaScript keywords (const, let, function, etc.)
+- **string** - String literals
+- **class** - Class names and numbers
+- **property** - Object properties
+- **entity** - Special entities
+- **jsxliterals** - JSX tag names and attributes
+- **sign** - Operators and punctuation
+- **comment** - Code comments
+- **break** - Line breaks
+- **space** - Whitespace
+
+<Note>
+  All CSS class names use the `--css-` prefix and token classes follow the pattern `.css__token--<token-type>`.
+</Note>
+
+## Accessing Constants
+
+You can access token types and modifiers programmatically:
+
+```jsx
+import { CodeSyntacticSugar } from 'code-syntactic-sugar';
+
+// Access token types
+console.log(CodeSyntacticSugar.TokenTypes);
+// ['identifier', 'keyword', 'string', ...]
+
+// Access token map
+console.log(CodeSyntacticSugar.TokenMap.get('keyword'));
+// 1
+
+// Access line modifiers
+console.log(CodeSyntacticSugar.LineModifiers);
+// ['highlighted', 'added', 'removed']
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Styling" icon="palette" href="/guides/styling">
+    Learn how to customize colors and create themes
+  </Card>
+  <Card title="Line Modifiers" icon="highlighter" href="/guides/line-modifiers">
+    Highlight, add, or remove specific lines
+  </Card>
+  <Card title="Line Numbers" icon="list-ol" href="/guides/line-numbers">
+    Add line numbers to your code blocks
+  </Card>
+  <Card title="Custom Themes" icon="brush" href="/guides/custom-themes">
+    Create your own color themes
+  </Card>
+</CardGroup>

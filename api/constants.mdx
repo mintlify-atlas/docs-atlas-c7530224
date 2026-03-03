@@ -1,0 +1,249 @@
+---
+title: Constants
+description: Constants and configuration values exported by Code Syntactic Sugar
+---
+
+Code Syntactic Sugar exports a `CodeSyntacticSugar` object containing token types, token mappings, and line modifiers.
+
+## CodeSyntacticSugar
+
+The main constants object exported by the library.
+
+```typescript
+const CodeSyntacticSugar = {
+  TokenTypes: types,
+  TokenMap: new Map(types.map((type, i) => [type, i])),
+  LineModifiers: modifiers,
+} as const;
+```
+
+### Import
+
+```typescript
+import { CodeSyntacticSugar } from "code-syntactic-sugar";
+```
+
+---
+
+## TokenTypes
+
+Read-only array of all token type strings.
+
+```typescript
+CodeSyntacticSugar.TokenTypes
+```
+
+**Type:** `readonly string[]`
+
+**Values:**
+
+| Index | Token Type | Description |
+|-------|------------|-------------|
+| 0 | `identifier` | Variable names, function names |
+| 1 | `keyword` | JavaScript keywords (if, const, function, etc.) |
+| 2 | `string` | String literals |
+| 3 | `class` | Class names, numbers, and null |
+| 4 | `property` | Object properties |
+| 5 | `entity` | Special entities |
+| 6 | `jsxliterals` | JSX literal values |
+| 7 | `sign` | Operators and punctuation |
+| 8 | `comment` | Comments |
+| 9 | `break` | Line breaks |
+| 10 | `space` | Whitespace |
+
+**Example:**
+
+```typescript
+import { CodeSyntacticSugar } from "code-syntactic-sugar";
+
+console.log(CodeSyntacticSugar.TokenTypes);
+// Output: ['identifier', 'keyword', 'string', 'class', 'property', 
+//          'entity', 'jsxliterals', 'sign', 'comment', 'break', 'space']
+
+// Get a specific token type
+const keywordType = CodeSyntacticSugar.TokenTypes[1]; // 'keyword'
+```
+
+---
+
+## TokenMap
+
+Map from token type strings to their numeric indices.
+
+```typescript
+CodeSyntacticSugar.TokenMap
+```
+
+**Type:** `Map<string, number>`
+
+**Mapping:**
+
+<ResponseField name="identifier" type="number">
+  Value: `0` - Maps to identifier tokens
+</ResponseField>
+
+<ResponseField name="keyword" type="number">
+  Value: `1` - Maps to keyword tokens
+</ResponseField>
+
+<ResponseField name="string" type="number">
+  Value: `2` - Maps to string literal tokens
+</ResponseField>
+
+<ResponseField name="class" type="number">
+  Value: `3` - Maps to class names, numbers, and null
+</ResponseField>
+
+<ResponseField name="property" type="number">
+  Value: `4` - Maps to object property tokens
+</ResponseField>
+
+<ResponseField name="entity" type="number">
+  Value: `5` - Maps to special entity tokens
+</ResponseField>
+
+<ResponseField name="jsxliterals" type="number">
+  Value: `6` - Maps to JSX literal tokens
+</ResponseField>
+
+<ResponseField name="sign" type="number">
+  Value: `7` - Maps to operator and punctuation tokens
+</ResponseField>
+
+<ResponseField name="comment" type="number">
+  Value: `8` - Maps to comment tokens
+</ResponseField>
+
+<ResponseField name="break" type="number">
+  Value: `9` - Maps to line break tokens
+</ResponseField>
+
+<ResponseField name="space" type="number">
+  Value: `10` - Maps to whitespace tokens
+</ResponseField>
+
+**Example:**
+
+```typescript
+import { CodeSyntacticSugar } from "code-syntactic-sugar";
+
+// Get the numeric index for a token type
+const keywordIndex = CodeSyntacticSugar.TokenMap.get("keyword"); // 1
+const stringIndex = CodeSyntacticSugar.TokenMap.get("string"); // 2
+
+// Use with Token type
+import type { Token } from "code-syntactic-sugar";
+
+const createToken = (type: string, value: string): Token | null => {
+  const index = CodeSyntacticSugar.TokenMap.get(type);
+  if (index === undefined) return null;
+  return [index, value];
+};
+
+const keywordToken = createToken("keyword", "const"); // [1, "const"]
+```
+
+---
+
+## LineModifiers
+
+Read-only array of available line modifier names.
+
+```typescript
+CodeSyntacticSugar.LineModifiers
+```
+
+**Type:** `readonly string[]`
+
+**Values:**
+
+<ResponseField name="highlighted" type="string">
+  Modifier name for highlighting lines. Used as `"highlighted-line"` in the UI.
+</ResponseField>
+
+<ResponseField name="added" type="string">
+  Modifier name for marking lines as added. Used as `"added-line"` in the UI, typically shown with a green background.
+</ResponseField>
+
+<ResponseField name="removed" type="string">
+  Modifier name for marking lines as removed. Used as `"removed-line"` in the UI, typically shown with a red background.
+</ResponseField>
+
+**Example:**
+
+```typescript
+import { CodeSyntacticSugar } from "code-syntactic-sugar";
+import type { CodeSyntacticSugarConfig } from "code-syntactic-sugar";
+
+console.log(CodeSyntacticSugar.LineModifiers);
+// Output: ['highlighted', 'added', 'removed']
+
+// Use modifiers in configuration
+const config: CodeSyntacticSugarConfig = {
+  modifiers: {
+    highlightedLines: [1, 2],
+    addedLines: [3],
+    removedLines: [4, 5]
+  }
+};
+```
+
+---
+
+## Internal Constants
+
+The following constants are used internally by the library but are not exported from the main `CodeSyntacticSugar` object.
+
+### Token Type Indices
+
+Numeric constants for token type indices:
+
+```typescript
+const T_IDENTIFIER = 0;
+const T_KEYWORD = 1;
+const T_STRING = 2;
+const T_CLS_NUMBER = 3;
+const T_PROPERTY = 4;
+const T_ENTITY = 5;
+const T_JSX_LITERALS = 6;
+const T_SIGN = 7;
+const T_COMMENT = 8;
+const T_BREAK = 9;
+const T_SPACE = 10;
+```
+
+### Keywords Set
+
+Set of JavaScript keywords recognized by the tokenizer:
+
+```typescript
+const keywords = new Set([
+  "for", "do", "while", "if", "else", "return", "function",
+  "var", "let", "const", "true", "false", "undefined",
+  "this", "new", "delete", "typeof", "in", "instanceof",
+  "void", "break", "continue", "switch", "case", "default",
+  "throw", "try", "catch", "finally", "debugger", "with",
+  "yield", "async", "await", "class", "extends", "super",
+  "import", "export", "from", "static"
+]);
+```
+
+### Signs Set
+
+Set of operators and punctuation characters:
+
+```typescript
+const signs = new Set([
+  "+", "-", "*", "/", "%", "=", "!", "&", "|", "^",
+  "~", "?", ":", ".", ",", ";", "'", '"', "(", ")",
+  "[", "]", "#", "@", "\\"
+]);
+```
+
+### JSX Brackets Set
+
+Set of JSX-specific bracket characters:
+
+```typescript
+const jsxBrackets = new Set(["<", ">", "{", "}", "[", "]"]);
+```

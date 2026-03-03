@@ -1,0 +1,121 @@
+---
+title: highlight()
+description: Syntax highlight JavaScript/TypeScript code and return React elements
+---
+
+The `highlight()` function is the main entry point for Code Syntactic Sugar. It takes JavaScript/TypeScript code as a string and returns highlighted React elements ready for rendering.
+
+## Signature
+
+```typescript
+function highlight(
+  code: string,
+  config?: CodeSyntacticSugarConfig
+): ReactElement
+```
+
+## Parameters
+
+<ParamField path="code" type="string" required>
+  The JavaScript or TypeScript code to highlight as a string.
+</ParamField>
+
+<ParamField path="config" type="CodeSyntacticSugarConfig">
+  Optional configuration object for customizing the highlighting behavior.
+  
+  <Expandable title="properties">
+    <ParamField path="modifiers" type="ModifierInputMap">
+      An object to specify visual modifiers for specific line numbers. Supports highlighting, adding, and removing lines.
+      
+      <Expandable title="properties">
+        <ParamField path="highlightedLines" type="LineNumbers">
+          Array of line numbers (1-indexed) to highlight. Type: `[number, ...number[]]`
+        </ParamField>
+        
+        <ParamField path="addedLines" type="LineNumbers">
+          Array of line numbers (1-indexed) to mark as added. Type: `[number, ...number[]]`
+        </ParamField>
+        
+        <ParamField path="removedLines" type="LineNumbers">
+          Array of line numbers (1-indexed) to mark as removed. Type: `[number, ...number[]]`
+        </ParamField>
+      </Expandable>
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+## Returns
+
+<ResponseField name="ReactElement" type="ReactElement">
+  A React element containing the highlighted code. The output is a tree of `<span>` elements with appropriate CSS classes for styling.
+</ResponseField>
+
+## Example
+
+```jsx
+import { highlight } from 'code-syntactic-sugar';
+import { createRoot } from 'react-dom/client';
+
+function CodeBlock() {
+  const code = `
+  const a = 10;
+  const b = 20;
+  console.log(a + b);
+  `.trim();
+
+  const codeLines = highlight(code);
+
+  return <code>{codeLines}</code>;
+}
+
+const root = createRoot(document.querySelector('#app > pre'));
+root.render(<CodeBlock />);
+```
+
+## Example with Line Modifiers
+
+```jsx
+import { highlight } from 'code-syntactic-sugar';
+
+function CodeBlock() {
+  const code = `
+    let a = 1;
+    let b = 10;
+    const result = a + b;
+    console.log(a);
+    console.log(b);
+    console.log(result);
+  `.trim();
+
+  const codeLines = highlight(code, {
+    modifiers: {
+      highlightedLines: [1, 2],
+      addedLines: [4, 5],
+      removedLines: [3],
+    },
+  });
+
+  return <code>{codeLines}</code>;
+}
+```
+
+## Notes
+
+<Note>
+  The `highlight()` function internally calls `tokenize()` to parse the code, then `generate()` to create line structures, and finally converts them to React elements.
+</Note>
+
+<Note>
+  Line numbers in modifier arrays are 1-indexed (not 0-indexed). Out-of-bounds line numbers are automatically ignored.
+</Note>
+
+<Note>
+  When multiple modifiers are applied to the same line, the order of precedence is:
+  1. `highlightedLines` (highest priority)
+  2. `addedLines`
+  3. `removedLines` (lowest priority)
+</Note>
+
+<Note>
+  The output requires React to be installed in your project as it returns React elements.
+</Note>

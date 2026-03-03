@@ -1,0 +1,664 @@
+---
+title: 'Next.js Integration'
+description: 'Complete guide to using Code Syntactic Sugar with Next.js App Router and Pages Router'
+---
+
+## Overview
+
+This guide covers integrating Code Syntactic Sugar with Next.js applications, including both the App Router (Next.js 13+) and Pages Router architectures. We'll explore client and server component patterns, optimal CSS loading strategies, and production-ready implementations.
+
+## Installation
+
+First, install the required dependencies:
+
+```bash
+npm install code-syntactic-sugar
+```
+
+<Note>
+  Code Syntactic Sugar requires React 18 or 19 as a peer dependency. Next.js 13+ already includes compatible React versions.
+</Note>
+
+## App Router Implementation
+
+The App Router uses React Server Components by default, but Code Syntactic Sugar needs to run on the client side since it generates React elements.
+
+<Tabs>
+  <Tab title="Client Component">
+    Create a client component for code highlighting:
+
+    ```tsx app/components/CodeBlock.tsx
+    'use client';
+
+    import { highlight, type CodeSyntacticSugarConfig } from 'code-syntactic-sugar';
+    import { useState } from 'react';
+    import './CodeBlock.css';
+
+    interface CodeBlockProps {
+      code: string;
+      language?: string;
+      showLineNumbers?: boolean;
+      fileName?: string;
+      highlightedLines?: number[];
+      addedLines?: number[];
+      removedLines?: number[];
+    }
+
+    export function CodeBlock({
+      code,
+      language = 'javascript',
+      showLineNumbers = false,
+      fileName,
+      highlightedLines = [],
+      addedLines = [],
+      removedLines = [],
+    }: CodeBlockProps) {
+      const [copied, setCopied] = useState(false);
+
+      const config: CodeSyntacticSugarConfig = {
+        modifiers: {
+          highlightedLines: highlightedLines.length > 0 
+            ? (highlightedLines as [number, ...number[]]) 
+            : undefined,
+          addedLines: addedLines.length > 0 
+            ? (addedLines as [number, ...number[]]) 
+            : undefined,
+          removedLines: removedLines.length > 0 
+            ? (removedLines as [number, ...number[]]) 
+            : undefined,
+        },
+      };
+
+      const highlightedCode = highlight(code, config);
+
+      const handleCopy = async () => {
+        await navigator.clipboard.writeText(code);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      };
+
+      return (
+        <div className="code-block">
+          <div className="code-block-header">
+            <div className="code-block-info">
+              {fileName ? (
+                <span className="file-name">{fileName}</span>
+              ) : (
+                <span className="language-label">{language}</span>
+              )}
+            </div>
+            <button 
+              className="copy-button" 
+              onClick={handleCopy}
+              aria-label="Copy code to clipboard"
+            >
+              {copied ? 'Copied!' : 'Copy'}
+            </button>
+          </div>
+          <pre className={showLineNumbers ? 'with-line-numbers' : ''}>
+            <code>{highlightedCode}</code>
+          </pre>
+        </div>
+      );
+    }
+    ```
+  </Tab>
+
+  <Tab title="Server Component Usage">
+    Use the client component from server components:
+
+    ```tsx app/page.tsx
+    import { CodeBlock } from './components/CodeBlock';
+
+    export default function Page() {
+      const exampleCode = `
+export default async function Page() {
+  const data = await fetch('https://api.example.com/data');
+  const json = await data.json();
+  
+  return (
+    <div>
+      <h1>{json.title}</h1>
+      <p>{json.description}</p>
+    </div>
+  );
+}
+      `.trim();
+
+      return (
+        <main className="container mx-auto px-4 py-8">
+          <h1 className="text-4xl font-bold mb-6">Next.js Server Components</h1>
+          <p className="mb-4">
+            This example demonstrates using Code Syntactic Sugar 
+            in a Next.js App Router page.
+          </p>
+          <CodeBlock 
+            code={exampleCode}
+            language="tsx"
+            fileName="app/page.tsx"
+            showLineNumbers={true}
+          />
+        </main>
+      );
+    }
+    ```
+  </Tab>
+
+  <Tab title="Global Styles">
+    Add the syntax highlighting styles to your global CSS:
+
+    ```css app/globals.css
+    @tailwind base;
+    @tailwind components;
+    @tailwind utilities;
+
+    /* Code Syntactic Sugar Theme */
+    :root {
+      --css-class: #4ec9b0;
+      --css-identifier: #9cdcfe;
+      --css-sign: #d4d4d4;
+      --css-property: #9cdcfe;
+      --css-entity: #dcdcaa;
+      --css-jsxliterals: #569cd6;
+      --css-string: #ce9178;
+      --css-keyword: #c586c0;
+      --css-comment: #6a9955;
+    }
+
+    /* Dark mode alternative */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --css-class: #4ec9b0;
+        --css-identifier: #9cdcfe;
+        --css-sign: #d4d4d4;
+        --css-property: #9cdcfe;
+        --css-entity: #dcdcaa;
+        --css-jsxliterals: #569cd6;
+        --css-string: #ce9178;
+        --css-keyword: #c586c0;
+        --css-comment: #6a9955;
+      }
+    }
+
+    /* Line numbers */
+    pre.with-line-numbers code {
+      counter-reset: css-line-number;
+    }
+
+    .css__line::before {
+      counter-increment: css-line-number;
+      content: counter(css-line-number);
+      display: inline-block;
+      width: 2.5rem;
+      margin-right: 1.5rem;
+      text-align: right;
+      color: #6e7681;
+      user-select: none;
+    }
+
+    /* Line modifiers */
+    .css__line[data-highlighted-line] {
+      background-color: rgba(255, 255, 255, 0.05);
+      border-left: 3px solid #fbbf24;
+      padding-left: 0.5rem;
+      margin-left: -0.5rem;
+    }
+
+    .css__line[data-added-line] {
+      background-color: rgba(34, 197, 94, 0.1);
+      border-left: 3px solid #22c55e;
+      padding-left: 0.5rem;
+      margin-left: -0.5rem;
+    }
+
+    .css__line[data-removed-line] {
+      background-color: rgba(239, 68, 68, 0.1);
+      border-left: 3px solid #ef4444;
+      padding-left: 0.5rem;
+      margin-left: -0.5rem;
+      text-decoration: line-through;
+      opacity: 0.7;
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Pages Router Implementation
+
+<Tabs>
+  <Tab title="Component">
+    Create a reusable component in the Pages Router:
+
+    ```tsx components/CodeBlock.tsx
+    import { highlight, type CodeSyntacticSugarConfig } from 'code-syntactic-sugar';
+    import { useState } from 'react';
+    import styles from './CodeBlock.module.css';
+
+    interface CodeBlockProps {
+      code: string;
+      language?: string;
+      showLineNumbers?: boolean;
+      fileName?: string;
+      highlightedLines?: number[];
+    }
+
+    export function CodeBlock({
+      code,
+      language = 'javascript',
+      showLineNumbers = false,
+      fileName,
+      highlightedLines = [],
+    }: CodeBlockProps) {
+      const [copied, setCopied] = useState(false);
+
+      const config: CodeSyntacticSugarConfig = highlightedLines.length > 0 ? {
+        modifiers: {
+          highlightedLines: highlightedLines as [number, ...number[]],
+        },
+      } : undefined;
+
+      const highlightedCode = highlight(code, config);
+
+      const handleCopy = async () => {
+        await navigator.clipboard.writeText(code);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      };
+
+      return (
+        <div className={styles.codeBlock}>
+          <div className={styles.header}>
+            <div className={styles.info}>
+              {fileName ? (
+                <span className={styles.fileName}>{fileName}</span>
+              ) : (
+                <span className={styles.language}>{language}</span>
+              )}
+            </div>
+            <button 
+              className={styles.copyButton} 
+              onClick={handleCopy}
+            >
+              {copied ? 'Copied!' : 'Copy'}
+            </button>
+          </div>
+          <pre className={showLineNumbers ? styles.withLineNumbers : undefined}>
+            <code>{highlightedCode}</code>
+          </pre>
+        </div>
+      );
+    }
+    ```
+  </Tab>
+
+  <Tab title="Page Usage">
+    Use the component in your pages:
+
+    ```tsx pages/index.tsx
+    import type { NextPage } from 'next';
+    import Head from 'next/head';
+    import { CodeBlock } from '../components/CodeBlock';
+
+    const Home: NextPage = () => {
+      const exampleCode = `
+import type { NextPage } from 'next';
+
+const Home: NextPage = () => {
+  return (
+    <div>
+      <h1>Welcome to Next.js!</h1>
+    </div>
+  );
+};
+
+export default Home;
+      `.trim();
+
+      return (
+        <>
+          <Head>
+            <title>Code Examples</title>
+            <meta name="description" content="Next.js code examples" />
+          </Head>
+
+          <main className="container">
+            <h1>Next.js Pages Router Example</h1>
+            <CodeBlock 
+              code={exampleCode}
+              language="tsx"
+              fileName="pages/index.tsx"
+              showLineNumbers={true}
+            />
+          </main>
+        </>
+      );
+    };
+
+    export default Home;
+    ```
+  </Tab>
+
+  <Tab title="CSS Module">
+    Create component-scoped styles:
+
+    ```css components/CodeBlock.module.css
+    .codeBlock {
+      border-radius: 8px;
+      overflow: hidden;
+      background: #1e1e1e;
+      margin: 1rem 0;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      background: #2d2d2d;
+      border-bottom: 1px solid #404040;
+    }
+
+    .info {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .fileName {
+      font-family: monospace;
+      font-size: 0.875rem;
+      color: #e0e0e0;
+      font-weight: 500;
+    }
+
+    .language {
+      font-family: monospace;
+      font-size: 0.75rem;
+      color: #a0a0a0;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .copyButton {
+      background: #404040;
+      color: #e0e0e0;
+      border: none;
+      padding: 0.375rem 0.75rem;
+      border-radius: 4px;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .copyButton:hover {
+      background: #505050;
+    }
+
+    .codeBlock pre {
+      margin: 0;
+      padding: 1rem;
+      overflow-x: auto;
+    }
+
+    .codeBlock code {
+      font-family: 'Fira Code', 'Monaco', 'Courier New', monospace;
+      font-size: 0.875rem;
+      line-height: 1.6;
+      display: block;
+    }
+
+    .withLineNumbers code {
+      counter-reset: css-line-number;
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## MDX Integration
+
+For content-heavy sites using MDX with Next.js:
+
+<CodeGroup>
+
+```tsx components/MDXCodeBlock.tsx
+'use client';
+
+import { highlight } from 'code-syntactic-sugar';
+import type { ReactElement } from 'react';
+
+interface MDXCodeBlockProps {
+  children: string;
+  className?: string;
+  showLineNumbers?: boolean;
+}
+
+export function MDXCodeBlock({ 
+  children, 
+  className,
+  showLineNumbers = false 
+}: MDXCodeBlockProps): ReactElement {
+  // Extract language from className (format: language-js)
+  const language = className?.replace(/language-/, '') || 'text';
+  
+  const highlightedCode = highlight(children.trim());
+
+  return (
+    <div className="mdx-code-block">
+      <div className="code-header">
+        <span className="language-badge">{language}</span>
+      </div>
+      <pre className={showLineNumbers ? 'with-line-numbers' : ''}>
+        <code>{highlightedCode}</code>
+      </pre>
+    </div>
+  );
+}
+```
+
+```tsx mdx-components.tsx
+import type { MDXComponents } from 'mdx/types';
+import { MDXCodeBlock } from './components/MDXCodeBlock';
+
+export function useMDXComponents(components: MDXComponents): MDXComponents {
+  return {
+    ...components,
+    code: MDXCodeBlock,
+  };
+}
+```
+
+```mdx app/blog/post.mdx
+---
+title: 'My Blog Post'
+date: '2024-01-15'
+---
+
+# Using Code Blocks in MDX
+
+Here's an example with automatic syntax highlighting:
+
+\`\`\`javascript
+const greeting = 'Hello, World!';
+console.log(greeting);
+\`\`\`
+
+The code block above is automatically highlighted using Code Syntactic Sugar!
+```
+
+</CodeGroup>
+
+<Tip>
+  When using MDX, the `code` component receives the code content as `children` and the language as part of the `className` prop (e.g., `language-javascript`).
+</Tip>
+
+## API Routes Example
+
+Show code examples in API documentation:
+
+```tsx app/api/docs/page.tsx
+'use client';
+
+import { CodeBlock } from '@/components/CodeBlock';
+
+export default function APIDocsPage() {
+  const fetchExample = `
+// Fetch user data
+const response = await fetch('/api/users/123', {
+  method: 'GET',
+  headers: {
+    'Authorization': 'Bearer YOUR_TOKEN',
+    'Content-Type': 'application/json',
+  },
+});
+
+const user = await response.json();
+console.log(user);
+  `.trim();
+
+  const postExample = `
+// Create a new user
+const response = await fetch('/api/users', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer YOUR_TOKEN',
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    name: 'John Doe',
+    email: 'john@example.com',
+  }),
+});
+
+const newUser = await response.json();
+  `.trim();
+
+  return (
+    <div className="api-docs">
+      <h1>API Documentation</h1>
+      
+      <section>
+        <h2>GET /api/users/:id</h2>
+        <p>Retrieve a user by ID</p>
+        <CodeBlock 
+          code={fetchExample}
+          language="javascript"
+          showLineNumbers={true}
+          highlightedLines={[2, 3, 4, 5, 6]}
+        />
+      </section>
+
+      <section>
+        <h2>POST /api/users</h2>
+        <p>Create a new user</p>
+        <CodeBlock 
+          code={postExample}
+          language="javascript"
+          showLineNumbers={true}
+          highlightedLines={[2, 3, 4, 5, 6, 7, 8, 9, 10]}
+        />
+      </section>
+    </div>
+  );
+}
+```
+
+## Performance Optimization
+
+<Card title="Dynamic Imports" icon="bolt">
+  For better code splitting, dynamically import the CodeBlock component:
+
+  ```tsx
+  import dynamic from 'next/dynamic';
+
+  const CodeBlock = dynamic(() => 
+    import('./components/CodeBlock').then(mod => ({ default: mod.CodeBlock }))
+  , {
+    loading: () => <div className="code-block-skeleton">Loading...</div>,
+    ssr: false,
+  });
+  ```
+</Card>
+
+<Card title="Memoization" icon="memory">
+  Cache highlighted code to avoid re-processing:
+
+  ```tsx
+  'use client';
+
+  import { highlight } from 'code-syntactic-sugar';
+  import { useMemo } from 'react';
+
+  export function CodeBlock({ code, highlightedLines }) {
+    const highlightedCode = useMemo(
+      () => highlight(code, { 
+        modifiers: { highlightedLines } 
+      }),
+      [code, highlightedLines]
+    );
+
+    return <pre><code>{highlightedCode}</code></pre>;
+  }
+  ```
+</Card>
+
+<Note>
+  Always mark components that use Code Syntactic Sugar with `'use client'` directive in Next.js App Router, as the library generates React elements at runtime.
+</Note>
+
+## Common Patterns
+
+### Loading Code from Files
+
+```tsx app/examples/[slug]/page.tsx
+import { promises as fs } from 'fs';
+import path from 'path';
+import { CodeBlock } from '@/components/CodeBlock';
+
+interface PageProps {
+  params: { slug: string };
+}
+
+export default async function ExamplePage({ params }: PageProps) {
+  const filePath = path.join(process.cwd(), 'examples', `${params.slug}.js`);
+  const code = await fs.readFile(filePath, 'utf-8');
+
+  return (
+    <div>
+      <h1>Example: {params.slug}</h1>
+      <CodeBlock 
+        code={code}
+        fileName={`${params.slug}.js`}
+        showLineNumbers={true}
+      />
+    </div>
+  );
+}
+```
+
+### Diff View for Documentation
+
+```tsx
+function DiffExample() {
+  const code = `
+function oldFunction(x) {
+  return x * 2;
+}
+
+function newFunction(x, multiplier = 2) {
+  return x * multiplier;
+}
+
+const result = newFunction(5, 3);
+  `.trim();
+
+  return (
+    <CodeBlock
+      code={code}
+      removedLines={[1, 2, 3]}
+      addedLines={[5, 6, 7]}
+      showLineNumbers={true}
+      fileName="refactor.js"
+    />
+  );
+}
+```

@@ -1,0 +1,192 @@
+---
+title: Styling
+description: Customize colors and create beautiful code themes with CSS variables and class names
+---
+
+## CSS Variables
+
+Code Syntactic Sugar uses CSS variables to style different token types. All class names use the `--css-` prefix. You can customize the appearance by adding CSS to your global stylesheet.
+
+### Default Theme Variables
+
+Here's the complete list of CSS variables you can customize:
+
+```css
+:root {
+  --css-class: #2d5e9d;
+  --css-identifier: #354150;
+  --css-sign: #8996a3;
+  --css-property: #0550ae;
+  --css-entity: #249a97;
+  --css-jsxliterals: #6266d1;
+  --css-string: #00a99a;
+  --css-keyword: #f47067;
+  --css-comment: #a19595;
+}
+```
+
+### Variable Mapping
+
+<Accordion title="Token type to CSS variable mapping">
+  Each token type corresponds to a specific CSS variable:
+
+  | Token Type | CSS Variable | Default Color |
+  |------------|--------------|---------------|
+  | identifier | `--css-identifier` | #354150 |
+  | keyword | `--css-keyword` | #f47067 |
+  | string | `--css-string` | #00a99a |
+  | class | `--css-class` | #2d5e9d |
+  | property | `--css-property` | #0550ae |
+  | entity | `--css-entity` | #249a97 |
+  | jsxliterals | `--css-jsxliterals` | #6266d1 |
+  | sign | `--css-sign` | #8996a3 |
+  | comment | `--css-comment` | #a19595 |
+</Accordion>
+
+## Token Class Names
+
+Each token is wrapped in a `<span>` element with a specific class name following the pattern `.css__token--<token-type>`.
+
+### Styling Individual Token Types
+
+You can target specific token types using CSS classes:
+
+```css
+/* Style all keywords */
+.css__token--keyword {
+  background: #f47067;
+  font-weight: bold;
+}
+
+/* Style all strings */
+.css__token--string {
+  color: #00a99a;
+  font-style: italic;
+}
+
+/* Style all comments */
+.css__token--comment {
+  color: #a19595;
+  opacity: 0.7;
+}
+```
+
+<Warning>
+  When using both CSS variables and class-based styles, class-based styles will take precedence due to CSS specificity.
+</Warning>
+
+## Line Styling
+
+Each line of code is wrapped in a `<span>` element with the `.css__line` class:
+
+```css
+/* Style all code lines */
+.css__line {
+  display: block;
+  padding: 0 1rem;
+}
+
+/* Add hover effect to lines */
+.css__line:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+```
+
+## Dark Mode Support
+
+Create a dark theme by overriding CSS variables for dark mode:
+
+<Tabs>
+  <Tab title="CSS Media Query">
+    ```css
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --css-class: #79c0ff;
+        --css-identifier: #e6edf3;
+        --css-sign: #8b949e;
+        --css-property: #79c0ff;
+        --css-entity: #56d364;
+        --css-jsxliterals: #d2a8ff;
+        --css-string: #a5d6ff;
+        --css-keyword: #ff7b72;
+        --css-comment: #8b949e;
+      }
+    }
+    ```
+  </Tab>
+  <Tab title="Dark Class">
+    ```css
+    .dark {
+      --css-class: #79c0ff;
+      --css-identifier: #e6edf3;
+      --css-sign: #8b949e;
+      --css-property: #79c0ff;
+      --css-entity: #56d364;
+      --css-jsxliterals: #d2a8ff;
+      --css-string: #a5d6ff;
+      --css-keyword: #ff7b72;
+      --css-comment: #8b949e;
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Container Styling
+
+Style the `<pre>` and `<code>` elements that contain your highlighted code:
+
+```css
+pre {
+  background-color: #f6f8fa;
+  border-radius: 6px;
+  padding: 16px;
+  overflow-x: auto;
+}
+
+pre code {
+  font-family: 'Fira Code', 'Courier New', monospace;
+  font-size: 14px;
+  line-height: 1.5;
+}
+```
+
+## Example: Custom Theme
+
+Here's a complete example of a custom "Ocean" theme:
+
+```css
+:root {
+  /* Ocean Theme */
+  --css-class: #82aaff;
+  --css-identifier: #c3e88d;
+  --css-sign: #89ddff;
+  --css-property: #82aaff;
+  --css-entity: #f78c6c;
+  --css-jsxliterals: #c792ea;
+  --css-string: #c3e88d;
+  --css-keyword: #c792ea;
+  --css-comment: #546e7a;
+}
+
+pre {
+  background-color: #0f111a;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+pre code {
+  color: #d6deeb;
+  font-family: 'Fira Code', monospace;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.css__line {
+  display: block;
+  padding: 0 12px;
+}
+```
+
+<Note>
+  See the [Custom Themes](/guides/custom-themes) guide for more theme examples and best practices.
+</Note>
